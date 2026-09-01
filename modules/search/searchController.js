@@ -1,0 +1,14 @@
+const searchService = require('./searchService');
+const { success } = require('../../middlewares/apiResponse');
+
+exports.search = (req, res) => {
+    const query = req.query.q || '';
+    let searchResults = { receitas: [], users: [] };
+
+    if (query) {
+        searchResults = searchService.globalSearch(query);
+    }
+
+    return success(res, { query, ...searchResults });
+}
+

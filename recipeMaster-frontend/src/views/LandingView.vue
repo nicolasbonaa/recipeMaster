@@ -1,25 +1,29 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getApiStatus } from '../services/systemService'
 
 const apiStatus = ref('carregando...')
 
 onMounted(async () => { 
     try {
-
-        const response = await fetch(import.meta.env.VITE_API_URL, {
-        method: 'GET',
-        headers: {
-                'Cache-Control': 'no-cache', 
-                'Pragma': 'no-cache' 
-            }
-        })
-        const json = await response.json()
-        apiStatus.value = json.data.status
+        const response = await getApiStatus()
+        apiStatus.value = response.data.status
     }catch (error){
         apiStatus.value = 'offline'
         console.error('Erro ao buscar status da API: ', error)
     }
 })
+
+import { search } from '../services/serachService'
+
+search('a')
+        .then((response) => {
+        console.log('Busca OK:', response.data)
+    })
+    .catch((error) => {
+    console.error('Erro na busca:', error.message)
+})
+
 </script>
 
 <template>

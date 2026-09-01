@@ -4,6 +4,7 @@ var cors = require('cors');
 require('dotenv').config();
 
 var indexRouter = require('./routes/index');
+var searchRoutes = require('./modules/search/searchRoutes');
 
 var app = express();
 
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 
 app.use('/api', indexRouter);
+app.use('/api', searchRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

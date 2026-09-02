@@ -2,6 +2,16 @@
 
 var app = require('../app');
 var http = require('http');
+var sequilize = require('../config/database');
+
+sequilize.authenticate()
+    .then(() => {
+        return sequilize.sync();
+    })
+    .catch((error) => {
+        console.error('Erro ao conectar com o banco de dados:', error);
+        process.exit(1);
+    });
 
 var port = process.env.PORT || 3000;
 

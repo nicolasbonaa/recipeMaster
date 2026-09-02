@@ -14,7 +14,7 @@ function error(
     message = 'Ocorreu um erro inesperado.', 
     statusCode = 500, errors = []
 ){
-    return res.statusCode(statusCode).json({
+    return res.status(statusCode).json({
         success: false,
         message,
         errors

@@ -2,22 +2,34 @@ const bcrypt = require('bcrypt');
 const { generateToken } = require('../../config/jwt');
 const User = require('../user/userModel');
 
-async function authenticate(email, password) {
-    const usuario = await User.findOne({ where: { email } });
+async function createLogin(email, password) {
+
+    const usuario = await User.findOne({
+        where: { email }
+    });
 
     if (!usuario) {
-        throw new Error('E-mail incorreto.');
+        const error = new Error('E-mail ou senha inválidos.');
+        error.statusCode = 401;
+        throw error;
     }
 
-    const senhaValida = await bcrypt.compare(password, usuario.password);
+    const senhaValida = await bcrypt.compare(
+        password,
+        usuario.password
+    );
 
     if (!senhaValida) {
-        throw new Error('Senha incorreta.');
+        const error = new Error('E-mail ou senha inválidos.');
+        error.statusCode = 401;
+        throw error;
     }
 
-    const token = generateToken({ email, password });
+    const token = generateToken({
+        id: usuario.id
+    });
 
     return token;
 }
 
-module.exports = { authenticate };
+module.exports = { createLogin };

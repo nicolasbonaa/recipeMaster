@@ -44,4 +44,18 @@ async function getPublicProfile(username){
     return user;
 }
 
-module.exports = { registerUser, getPublicProfile };
+async function getUserProfile(id){
+
+    const user = await User.findByPk(id);
+
+    if(!user){
+        const error = new Error('Usuário não encontrado.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return user;
+
+}
+
+module.exports = { registerUser, getPublicProfile, getUserProfile };

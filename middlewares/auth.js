@@ -4,7 +4,7 @@ function authenticate(req, res, next){
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if(!token) return res.status(401).json({ message: 'O token não foi fornecido.' });
+    if(!token) return res.status(401).json({ message: 'Usuário não autenticado.' });
 
     try {
         const data = verifyToken(token);
@@ -15,4 +15,4 @@ function authenticate(req, res, next){
     }
 }
 
-module.exports = authenticate;
+module.exports = { authenticate };

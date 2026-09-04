@@ -6,6 +6,7 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var searchRoutes = require('./modules/search/searchRoutes');
 var userRoutes = require('./modules/user/userRoutes');
+var authRoutes = require('./modules/auth/authRoutes');
 var errorHandler = require('./middlewares/errorHandler');
 
 var app = express();
@@ -22,6 +23,7 @@ app.use(cors({
 app.use('/api', indexRouter);
 app.use('/api', searchRoutes);
 app.use('/api', userRoutes);
+app.use('/api', authRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

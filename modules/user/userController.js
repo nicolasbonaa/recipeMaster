@@ -6,7 +6,7 @@ exports.register = async(req, res, next) => {
 
     const newUser = await UserService.registerUser(username, email, password, fullName);
 
-    return success(res, 'Usuário registrado com sucesso. Faça Login para continuar', 201, newUser);
+    return success(res, newUser, 'Usuário registrado com sucesso. Faça Login para continuar', 201);
 }
 
 exports.getPublicProfile = async(req, res, next) => {
@@ -14,3 +14,4 @@ exports.getPublicProfile = async(req, res, next) => {
 
     return success(res, user);
 }
+

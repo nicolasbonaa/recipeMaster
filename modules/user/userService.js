@@ -1,5 +1,6 @@
 const User = require('./userModel');
 const bcrypt = require('bcrypt');
+const auth = require('../../middlewares/auth');
 
 async function registerUser(username, email, password, fullName){
 
@@ -29,7 +30,6 @@ async function registerUser(username, email, password, fullName){
 }
 
 async function getPublicProfile(username){
-
     const user = await User.findOne({
         where: { username },
         attributes: ['id', 'username', 'fullName', 'bio', 'profilePicture', 'followersCount', 'followingCount', 'recipesCount']
@@ -40,6 +40,8 @@ async function getPublicProfile(username){
         error.statusCode = 404;
         throw error;
     }
+
+    return user;
 }
 
 module.exports = { registerUser, getPublicProfile };

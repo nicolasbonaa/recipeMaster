@@ -1,6 +1,7 @@
 var express = require('express');
 var logger = require('morgan');
 var cors = require('cors');
+var path = require('path');
 require('dotenv').config();
 
 var indexRouter = require('./routes/index');
@@ -14,6 +15,7 @@ var app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',

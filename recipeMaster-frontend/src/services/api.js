@@ -13,6 +13,8 @@ para a nossa aplicação, porém algo está errado pois estamos recebendo erro 4
 */
 
 import axios from "axios";
+import router from '../router/index.js'
+import { useAuthStore } from '../stores/auth.js'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -24,6 +26,13 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response.data,
     (error) => {
+        if (error.response?.status === 401) {
+            useAuthStore().logout()
+            if (router.currentRoute.value.name !== 'login') {
+                router.push({ name: 'login' })
+            }
+        }
+
         if (error.response) {
             const apiError = error.response.data
             return Promise.reject({
@@ -40,6 +49,16 @@ api.interceptors.response.use(
         }
     }
 )
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('recipeMaster_token')
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+
+    return config
+})
 
 export default api;
 

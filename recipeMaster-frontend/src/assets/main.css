@@ -1,0 +1,33 @@
+:root {
+  --brand-color: #d96c4d;
+  --brand-dark: #a94731;
+  --brand-soft: #fff1eb;
+}
+
+body {
+  background-color: #fffaf7;
+  color: #332c29;
+}
+
+.btn-brand {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--brand-color);
+  --bs-btn-border-color: var(--brand-color);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-focus-shadow-rgb: 217, 108, 77;
+}
+
+.brand-link {
+  color: var(--brand-color);
+  text-decoration: none;
+}
+
+.brand-link:hover {
+  color: var(--brand-dark);
+}
+
+.auth-page {
+  min-height: calc(100vh - 120px);
+}

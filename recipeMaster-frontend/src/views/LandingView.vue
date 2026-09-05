@@ -14,16 +14,6 @@ onMounted(async () => {
     }
 })
 
-import { search } from '../services/serachService'
-
-search('a')
-        .then((response) => {
-        console.log('Busca OK:', response.data)
-    })
-    .catch((error) => {
-    console.error('Erro na busca:', error.message)
-})
-
 </script>
 
 <template>

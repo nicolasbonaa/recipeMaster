@@ -10,7 +10,7 @@ async function createLogin(email, password) {
 
     if (!usuario) {
         const error = new Error('E-mail ou senha inválidos.');
-        error.statusCode = 401;
+        error.statusCode = 500;
         throw error;
     }
 
@@ -21,7 +21,7 @@ async function createLogin(email, password) {
 
     if (!senhaValida) {
         const error = new Error('E-mail ou senha inválidos.');
-        error.statusCode = 401;
+        error.statusCode = 500;
         throw error;
     }
 

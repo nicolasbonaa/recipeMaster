@@ -1,0 +1,914 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R] /Count 8 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 3806 >>
+stream
+BT /F1 9 Tf 45 770 Td (Avaliação N2 — Projeto e Arquitetura de Software) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (RecipeMaster) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Domínio: plataforma social de receitas culinárias para publicação,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (descoberta e interação entre cozinheiros. Usuários criam perfis, publicam) Tj ET
+
+BT /F1 9 Tf 45 770 Td (receitas com imagens, consultam feeds, curtem e comentam conteúdo e podem) Tj ET
+
+BT /F1 9 Tf 45 770 Td (acompanhar outros usuários; a administração apoia moderação.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Este relatório consolida:) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Arquitetura DDD;) Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Camada de comunicação e modelo C4;) Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Inspeção SOLID.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Consulte os documentos vinculados para a descrição completa, diagramas,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (contratos de evento, evidências com linhas do código e propostas de) Tj ET
+
+BT /F1 9 Tf 45 770 Td (refatoração.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Conclusão) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (A separação por bounded contexts reduz o acoplamento entre identidade,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (catálogo, comunidade, descoberta e moderação. A Outbox com RabbitMQ acrescenta) Tj ET
+
+BT /F1 9 Tf 45 770 Td (comunicação assíncrona confiável sem tornar o frontend dependente do broker. A) Tj ET
+
+BT /F1 9 Tf 45 770 Td (inspeção identificou seis oportunidades concretas de melhoria nos princípios) Tj ET
+
+BT /F1 9 Tf 45 770 Td (SRP, OCP, ISP e DIP, com mudanças propostas que preservam o comportamento) Tj ET
+
+BT /F1 9 Tf 45 770 Td (externo e isolam detalhes de infraestrutura.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (01 ARQUITETURA DDD) Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Questão 1 — Arquitetura orientada a DDD) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Domínio e linguagem ubíqua) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (O domínio é uma comunidade de receitas. Os termos usados no código e nas) Tj ET
+
+BT /F1 9 Tf 45 770 Td (interfaces devem ser consistentes:) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Termo | Significado no domínio |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| --- | --- |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Usuário | Pessoa autenticada que utiliza a plataforma |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Autor | Usuário proprietário de uma receita |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Receita | Publicação culinária com título, descrição e imagem |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Feed | Lista paginada de receitas visíveis ao usuário |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Curtida | Relação entre usuário e receita |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Comentário | Texto associado a uma receita e a um autor |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Perfil | Dados públicos e contadores de um usuário |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Publicação | Caso de uso que cria uma receita |) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Bounded contexts) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Identidade e Acesso) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Responsável por cadastro, autenticação, credenciais, token, bloqueio e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (permissões administrativas. Não deve conhecer a estrutura interna de receitas.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3354 >>
+stream
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Comunidade) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Responsável por perfil público, seguir/deixar de seguir, curtidas e comentários.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Mantém as interações sociais e suas regras, referenciando identidades por) Tj ET
+
+BT /F1 9 Tf 45 770 Td (userId em vez de importar o agregado inteiro de Usuário.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Catálogo de Receitas) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Responsável pelo agregado Recipe, publicação, edição, remoção, imagem,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (contagem de visualizações e consulta do feed. O autor é uma referência para o) Tj ET
+
+BT /F1 9 Tf 45 770 Td (contexto de Identidade.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Descoberta) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Responsável por busca, feed geral e, futuramente, feed baseado em) Tj ET
+
+BT /F1 9 Tf 45 770 Td (seguimentos/relevância. Pode manter uma projeção própria para evitar consultas) Tj ET
+
+BT /F1 9 Tf 45 770 Td (transversais nos agregados transacionais.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Moderação) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Responsável por denúncias, bloqueios, aprovação e auditoria. É um contexto) Tj ET
+
+BT /F1 9 Tf 45 770 Td (separado, mesmo que inicialmente tenha apenas operações administrativas.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Organização proposta) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td (src/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (??? shared/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? domain/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? Entity.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? DomainError.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? DomainEvent.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? infrastructure/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? database/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? events/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (??? contexts/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? identity-access/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? domain/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? entities/User.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? value-objects/Email.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? ports/UserRepository.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? application/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? use-cases/{RegisterUser,LoginUser}.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? infrastructure/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? persistence/SequelizeUserRepository.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? security/{BcryptPasswordHasher,JwtTokenService}.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? interfaces/http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? recipe-catalog/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? domain/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? entities/Recipe.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? services/RecipeOwnership.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? events/RecipePublished.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? application/) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 3835 >>
+stream
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? use-cases/{PublishRecipe,EditRecipe,DeleteRecipe}.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? infrastructure/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? persistence/SequelizeRecipeRepository.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ?   ??? storage/LocalImageStorage.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? interfaces/http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? community/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? domain/{Like,Comment,Follow}.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? application/use-cases/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? infrastructure/persistence/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? interfaces/http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? discovery/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? application/use-cases/{SearchRecipes,GetFeed}.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? infrastructure/read-models/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ?   ??? interfaces/http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?   ??? moderation/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? domain/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? application/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? infrastructure/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (?       ??? interfaces/http/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (??? composition-root/) Tj ET
+
+BT /F1 9 Tf 45 770 Td (??? app.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (4. Regras de dependência) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (As dependências apontam para dentro:) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td (interfaces/http -> application -> domain) Tj ET
+
+BT /F1 9 Tf 45 770 Td (infrastructure  -> application/domain \(implementa portas\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td (composition-root -> todos os contextos \(monta as dependências\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td (domain           -> shared/domain) Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (O domínio não importa Express, Sequelize, bcrypt, JWT, Multer, filesystem ou) Tj ET
+
+BT /F1 9 Tf 45 770 Td (RabbitMQ. Repositórios, armazenamento de imagens, hash de senha, tokens e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (publicação de eventos são portas definidas no domínio/aplicação e adaptadores) Tj ET
+
+BT /F1 9 Tf 45 770 Td (implementados na infraestrutura.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (5. Mapeamento do sistema atual para DDD) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Código atual | Destino proposto | Observação |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| --- | --- | --- |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| modules/user e modules/auth | identity-access | Separar credencial de perfil |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| modules/recipe | recipe-catalog | Extrair regras do agregado |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| modules/like e modules/comment | community | Interações sociais |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| modules/search | discovery | Read model e consultas |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| config/database.js e Models Sequelize | infrastructure/persistence | Adaptadores de persistência |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| middlewares/Multer.js | infrastructure/storage | Adaptador de arquivos |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| config/jwt.js | identity-access/infrastructure/security | Implementação de porta |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| routes e controllers | interfaces/http | Adaptadores de entrada |) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (6. Agregados e casos de uso prioritários) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (- User: identidade, email, username e estado de bloqueio.) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 4279 >>
+stream
+BT /F1 9 Tf 45 770 Td (- Recipe: título, descrição, imagem, autor e contadores; invariantes de) Tj ET
+
+BT /F1 9 Tf 45 770 Td (proprietário e conteúdo obrigatório.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- Comment: autor, receita e conteúdo validado.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- Like: relação única entre usuário e receita.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Casos de uso iniciais: RegisterUser, LoginUser, PublishRecipe,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (EditRecipe, DeleteRecipe, GetRecipeDetails, ToggleLike,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (CreateComment e SearchRecipes. Cada caso de uso recebe portas por) Tj ET
+
+BT /F1 9 Tf 45 770 Td (injeção, coordena uma transação quando necessário e retorna um DTO, não uma) Tj ET
+
+BT /F1 9 Tf 45 770 Td (instância Sequelize.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (02 COMUNICACAO C4) Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Questão 2 — Camada de comunicação orientada a eventos) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Necessidade de negócio) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (A publicação de uma receita é o ponto de maior valor para a comunidade, mas) Tj ET
+
+BT /F1 9 Tf 45 770 Td (também pode disparar tarefas que não precisam atrasar a resposta HTTP:) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (- atualizar o feed e o índice de busca;) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- notificar seguidores do autor;) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- registrar auditoria e encaminhar conteúdo para moderação;) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- recalcular métricas e recomendações.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Executar tudo dentro da requisição de publicação aumenta latência e acoplamento.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Se o índice ou o serviço de notificações ficar indisponível, a publicação não) Tj ET
+
+BT /F1 9 Tf 45 770 Td (deve ser perdida nem falhar por uma função secundária. Eventos de domínio) Tj ET
+
+BT /F1 9 Tf 45 770 Td (permitem processamento assíncrono, retry e evolução independente dos módulos.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Fluxo proposto) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. PublishRecipe valida o agregado e persiste a receita e um registro) Tj ET
+
+BT /F1 9 Tf 45 770 Td (outboxevents na mesma transação MySQL.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Um publicador lê eventos pendentes da Outbox e publica) Tj ET
+
+BT /F1 9 Tf 45 770 Td (recipe.published.v1 no RabbitMQ.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Consumidores independentes processam o evento:) Tj ET
+
+BT /F1 9 Tf 45 770 Td (DiscoveryProjection, Notification e Moderation.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (4. Cada consumidor confirma somente após concluir o processamento. Falhas são) Tj ET
+
+BT /F1 9 Tf 45 770 Td (reprocessadas com backoff e, após o limite, encaminhadas à DLQ.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (5. Consumidores usam eventId como chave de idempotência.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Escolhas técnicas) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Decisão | Justificativa |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| --- | --- |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| RabbitMQ | Broker maduro, filas duráveis, acknowledgements, retry e DLQ |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Eventos JSON versionados | Integração simples entre módulos Node.js e evolução compatível |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Outbox transacional em MySQL | Evita o dual-write: receita e evento são confirmados juntos |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| eventId + tabela de consumo | Reentrega não duplica projeções nem notificações |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| Routing key por evento | Permite novos consumidores sem modificar o produtor |) Tj ET
+
+BT /F1 9 Tf 45 770 Td (| DLQ e observabilidade | Falhas persistentes ficam visíveis para operação e correção |) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (O broker não substitui o banco transacional. A publicação é eventual e os) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3317 >>
+stream
+BT /F1 9 Tf 45 770 Td (consumidores devem tolerar eventos fora de ordem, duplicados e reentregues.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (4. Contrato de evento) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td ({) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("eventId": "uuid",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("eventType": "recipe.published.v1",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("occurredAt": "2026-10-29T12:00:00.000Z",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("aggregate": {) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("type": "Recipe",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("id": 42) Tj ET
+
+BT /F1 9 Tf 45 770 Td (},) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("payload": {) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("recipeId": 42,) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("authorId": 7,) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("title": "Pão de queijo",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("image": "recipe-7-uuid.jpg") Tj ET
+
+BT /F1 9 Tf 45 770 Td (},) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("metadata": {) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("correlationId": "uuid",) Tj ET
+
+BT /F1 9 Tf 45 770 Td ("schemaVersion": 1) Tj ET
+
+BT /F1 9 Tf 45 770 Td (}) Tj ET
+
+BT /F1 9 Tf 45 770 Td (}) Tj ET
+
+BT /F1 9 Tf 45 770 Td ([diagrama ou trecho de codigo]) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (5. Limites e segurança) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (- O evento não contém senha, token ou dados pessoais desnecessários.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- O consumidor valida eventType, versão e campos obrigatórios.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- O acesso ao RabbitMQ usa credenciais fora do código e TLS em produção.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- A fila possui limite de tamanho, TTL de mensagens e DLQ monitorada.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (- Métricas mínimas: idade da Outbox, taxa de erro, retries, profundidade da) Tj ET
+
+BT /F1 9 Tf 45 770 Td (fila, latência de consumo e mensagens na DLQ.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (6. Diagramas) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Os arquivos .mmd desta pasta são a fonte editável dos diagramas C4. Eles) Tj ET
+
+BT /F1 9 Tf 45 770 Td (podem ser renderizados com Mermaid/mermaid-cli ou visualizados em editores que) Tj ET
+
+BT /F1 9 Tf 45 770 Td (suportem Mermaid.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (C4 nível 1 — contexto) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (O usuário publica e consulta receitas pela API. A API publica eventos para os) Tj ET
+
+BT /F1 9 Tf 45 770 Td (processadores assíncronos, que atualizam descoberta, notificações e moderação.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (C4 nível 2 — contêineres) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (O sistema é separado em API, MySQL/Outbox, broker e consumidores. O frontend) Tj ET
+
+BT /F1 9 Tf 45 770 Td (continua consumindo a API HTTP; não acessa o broker.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (C4 nível 3 — componentes da comunicação) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Dentro da API ficam o caso de uso, o repositório transacional e o escritor da) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Outbox. O publicador e os consumidores implementam retry, idempotência e DLQ.) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 4163 >>
+stream
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (03 ANALISE SOLID) Tj ET
+
+BT /F1 9 Tf 45 770 Td (==========================================================================================) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Questão 3 — Inspeção SOLID) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Metodologia) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Foi delimitado o backend em backend-recipemaster, excluindo dependências e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (arquivos gerados.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Foram listados os módulos de rota, controllers, services, models,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (middlewares e configurações.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Cada módulo foi lido procurando: mais de uma razão de mudança; dependência) Tj ET
+
+BT /F1 9 Tf 45 770 Td (direta de detalhes; contratos implícitos entre funções; clientes forçados a) Tj ET
+
+BT /F1 9 Tf 45 770 Td (importar operações que não usam; e pontos que exigem edição de código) Tj ET
+
+BT /F1 9 Tf 45 770 Td (existente para adicionar uma variação.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (4. Para cada achado foram registrados arquivo, linhas, evidência, princípio) Tj ET
+
+BT /F1 9 Tf 45 770 Td (afetado, impacto e uma refatoração possível.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (5. A inspeção é reproduzível lendo os arquivos citados no commit/estado do) Tj ET
+
+BT /F1 9 Tf 45 770 Td (repositório e repetindo a busca por sequelize, fs, bcrypt, require,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (multer e module.exports.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Os princípios foram aplicados à abordagem funcional: módulo/bloco equivale à) Tj ET
+
+BT /F1 9 Tf 45 770 Td (classe, função equivale ao método e dependência concreta equivale a uma) Tj ET
+
+BT /F1 9 Tf 45 770 Td (dependência de infraestrutura. Uma ocorrência pode representar mais de um) Tj ET
+
+BT /F1 9 Tf 45 770 Td (princípio; o enunciado permite repetições.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Achados) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S1 — recipeService tem responsabilidades demais \(SRP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: recipeService.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (importa Sequelize, quatro Models e filesystem. No mesmo módulo, as funções) Tj ET
+
+BT /F1 9 Tf 45 770 Td (criam consultas, controlam transações, aplicam autorização do proprietário,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (montam DTOs, incrementam contadores e removem arquivos \(linhas 11–82\).) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: mudanças no banco, na regra de autorização, no formato de) Tj ET
+
+BT /F1 9 Tf 45 770 Td (resposta ou no armazenamento de imagens exigem alterar o mesmo módulo.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Refatoração: separar PublishRecipe/EditRecipe/DeleteRecipe \(aplicação\),) Tj ET
+
+BT /F1 9 Tf 45 770 Td (RecipeRepository e UserCounterRepository \(portas/adaptadores\), uma política) Tj ET
+
+BT /F1 9 Tf 45 770 Td (RecipeOwnership \(domínio\) e ImageStorage \(porta\). O controller recebe) Tj ET
+
+BT /F1 9 Tf 45 770 Td (somente DTOs do caso de uso.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S2 — userService mistura identidade, perfil e arquivos \(SRP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: userService.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (faz hash com bcrypt, consulta e cria usuários, monta perfil público, atualiza) Tj ET
+
+BT /F1 9 Tf 45 770 Td (perfil e remove imagens via fs \(linhas 26–116\).) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: segurança de credenciais, leitura de perfil, persistência e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (armazenamento são razões de mudança diferentes.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Refatoração: separar RegisterUser/PasswordHasher, UserRepository,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (ProfileService e ProfileImageStorage; manter profileData como mapper) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 3810 >>
+stream
+BT /F1 9 Tf 45 770 Td (dedicado ou DTO do contexto de identidade.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S3 — autenticação depende de detalhes concretos \(DIP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: authService.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (importa diretamente bcrypt, o Model Sequelize e generateToken de JWT.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: o caso de login depende do ORM, da biblioteca de hash e do) Tj ET
+
+BT /F1 9 Tf 45 770 Td (formato JWT, em vez de depender de abstrações. Testes precisam de banco e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (bibliotecas reais.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Refatoração: definir UserCredentialReader, PasswordVerifier e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (TokenIssuer como portas; injetar adaptadores) Tj ET
+
+BT /F1 9 Tf 45 770 Td (SequelizeUserCredentialReader, BcryptPasswordVerifier e) Tj ET
+
+BT /F1 9 Tf 45 770 Td (JwtTokenIssuer no composition root.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S4 — recipeService depende diretamente da infraestrutura \(DIP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: recipeService.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (importa config/database, Models Sequelize e fs/promises para implementar o) Tj ET
+
+BT /F1 9 Tf 45 770 Td (caso de uso.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: uma regra de publicação/remoção fica acoplada a MySQL,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Sequelize e disco local; trocar banco, storage ou testar uma regra isolada) Tj ET
+
+BT /F1 9 Tf 45 770 Td (requer modificar a regra.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Refatoração: o serviço de aplicação deve receber recipeRepository,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (interactionRepository, imageStorage e transactionRunner. Os adaptadores) Tj ET
+
+BT /F1 9 Tf 45 770 Td (atuais implementam essas portas.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S5 — clientes ficam acoplados a um módulo de serviço amplo \(ISP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: recipeController.js) Tj ET
+
+BT /F1 9 Tf 45 770 Td (importa o namespace inteiro de recipeService, que exporta sete operações) Tj ET
+
+BT /F1 9 Tf 45 770 Td (diferentes em recipeService.js.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: o controller de HTTP conhece o conjunto de consultas,) Tj ET
+
+BT /F1 9 Tf 45 770 Td (mutação e exclusão do módulo, embora cada endpoint use apenas uma parte. Em) Tj ET
+
+BT /F1 9 Tf 45 770 Td (uma arquitetura funcional, esse namespace é uma interface ampla imposta ao) Tj ET
+
+BT /F1 9 Tf 45 770 Td (cliente.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Refatoração: expor portas pequenas por caso de uso) Tj ET
+
+BT /F1 9 Tf 45 770 Td (\(PublishRecipe, RecipeQueries, ManageRecipe\) ou injetar funções/objetos) Tj ET
+
+BT /F1 9 Tf 45 770 Td (com apenas a operação requerida por cada controller.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (S6 — composição de rotas exige alteração para cada novo módulo \(OCP\)) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Evidência: app.js importa cada conjunto) Tj ET
+
+BT /F1 9 Tf 45 770 Td (de rotas individualmente e as registra manualmente nas linhas 26–32. A adição) Tj ET
+
+BT /F1 9 Tf 45 770 Td (de um bounded context exige editar o módulo central, além de criar o próprio) Tj ET
+
+BT /F1 9 Tf 45 770 Td (módulo.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Por que viola: a composição não é fechada para extensão; o núcleo HTTP) Tj ET
+
+BT /F1 9 Tf 45 770 Td (acumula conhecimento de todas as funcionalidades.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 16 0 R >>
+endobj
+18 0 obj
+<< /Length 1957 >>
+stream
+BT /F1 9 Tf 45 770 Td (Refatoração: cada contexto exporta um adaptador com prefixo/metadados e o) Tj ET
+
+BT /F1 9 Tf 45 770 Td (composition root carrega uma lista explícita de módulos \(ou um registro) Tj ET
+
+BT /F1 9 Tf 45 770 Td (centralizado de adapters\). A inicialização continua explícita e tipada, mas o) Tj ET
+
+BT /F1 9 Tf 45 770 Td (app não precisa conhecer handlers internos.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Observação sobre Liskov) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (Não foi marcado um sétimo achado de LSP como violação confirmada. O código usa) Tj ET
+
+BT /F1 9 Tf 45 770 Td (funções e objetos Sequelize sem hierarquia de subtipos explícita; inventar uma) Tj ET
+
+BT /F1 9 Tf 45 770 Td (substituição quebrada seria menos reproduzível do que os seis achados acima.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (Na refatoração proposta, o LSP deve ser verificado nos contratos das portas:) Tj ET
+
+BT /F1 9 Tf 45 770 Td (qualquer RecipeRepository substituto precisa preservar not found, atomicidade) Tj ET
+
+BT /F1 9 Tf 45 770 Td (e semântica de atualização esperadas pelos casos de uso.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (4. Priorização) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (1. Alta: S3 e S4, pois dificultam testes e migração de infraestrutura.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (2. Alta: S1 e S2, pois mudanças pequenas atravessam serviços com muitas) Tj ET
+
+BT /F1 9 Tf 45 770 Td (responsabilidades.) Tj ET
+
+BT /F1 9 Tf 45 770 Td (3. Média: S5 e S6, pois o acoplamento cresce conforme novos contextos são) Tj ET
+
+BT /F1 9 Tf 45 770 Td (adicionados.) Tj ET
+
+BT /F1 9 Tf 45 770 Td () Tj ET
+
+BT /F1 9 Tf 45 770 Td (As sugestões são intencionalmente arquiteturais; não foram implementadas no) Tj ET
+
+BT /F1 9 Tf 45 770 Td (backend porque o enunciado solicita a análise e a proposta, não a refatoração) Tj ET
+
+BT /F1 9 Tf 45 770 Td (do projeto web.) Tj ET
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 18 0 R >>
+endobj
+xref
+0 20
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000168 00000 n 
+0000000265 00000 n 
+0000004122 00000 n 
+0000004248 00000 n 
+0000007653 00000 n 
+0000007779 00000 n 
+0000011665 00000 n 
+0000011791 00000 n 
+0000016122 00000 n 
+0000016250 00000 n 
+0000019619 00000 n 
+0000019747 00000 n 
+0000023962 00000 n 
+0000024090 00000 n 
+0000027952 00000 n 
+0000028080 00000 n 
+0000030089 00000 n 
+trailer
+<< /Size 20 /Root 1 0 R >>
+startxref
+30217
+%%EOF

@@ -1,0 +1,20 @@
+C4Component
+title RecipeMaster API — componentes de comunicação
+
+Container_Boundary(api, "API RecipeMaster") {
+    Component(publish, "PublishRecipe", "Application service", "Executa o caso de uso")
+    Component(repo, "RecipeRepository", "Porta", "Persiste agregado e Outbox na transação")
+    Component(outbox, "OutboxWriter", "Porta", "Registra evento pendente")
+    Component(publisher, "OutboxPublisher", "Worker", "Publica e marca evento")
+}
+ContainerQueue(broker, "RabbitMQ", "Broker", "Exchange, filas e DLQ")
+Component(consumer, "EventConsumer", "Worker adapter", "Valida, deduplica, processa e confirma")
+Component(handler, "RecipePublishedHandlers", "Application handlers", "Projeção, notificação e moderação")
+
+Rel(publish, repo, "Solicita persistência")
+Rel(publish, outbox, "Registra RecipePublished")
+Rel(repo, outbox, "Mesma transação")
+Rel(publisher, outbox, "Busca pendentes")
+Rel(publisher, broker, "Publica")
+Rel(broker, consumer, "Entrega/reentrega")
+Rel(consumer, handler, "Despacha após idempotência")

@@ -1,0 +1,15 @@
+C4Context
+title RecipeMaster — Diagrama de contexto
+
+Person(user, "Usuário", "Publica, consulta e interage com receitas")
+System(recipeMaster, "RecipeMaster", "Plataforma social de receitas")
+System_Ext(rabbit, "RabbitMQ", "Mensageria assíncrona")
+System_Ext(discovery, "Processador de descoberta", "Atualiza busca e feeds")
+System_Ext(notification, "Processador de notificações", "Notifica seguidores")
+System_Ext(moderation, "Processador de moderação", "Audita e modera conteúdo")
+
+Rel(user, recipeMaster, "Usa", "HTTPS/JSON")
+Rel(recipeMaster, rabbit, "Publica eventos de domínio", "AMQP/TLS")
+Rel(rabbit, discovery, "Entrega eventos", "AMQP")
+Rel(rabbit, notification, "Entrega eventos", "AMQP")
+Rel(rabbit, moderation, "Entrega eventos", "AMQP")

@@ -1,0 +1,24 @@
+C4Container
+title RecipeMaster — Contêineres com mensageria
+
+Person(user, "Usuário", "Cliente da plataforma")
+System_Boundary(rm, "RecipeMaster") {
+    Container(frontend, "Frontend Web", "Vue", "Interface do usuário")
+    Container(api, "API", "Node.js/Express", "Casos de uso HTTP")
+    ContainerDb(mysql, "MySQL", "MySQL", "Dados transacionais")
+    Container(outbox, "Outbox Publisher", "Node.js worker", "Publica eventos pendentes")
+}
+ContainerQueue(broker, "Event Broker", "RabbitMQ", "Filas, retry e DLQ")
+Container(discovery, "Discovery Consumer", "Node.js worker", "Projeção de busca/feed")
+Container(notification, "Notification Consumer", "Node.js worker", "Notificações")
+Container(moderation, "Moderation Consumer", "Node.js worker", "Auditoria e moderação")
+
+Rel(user, frontend, "Acessa", "HTTPS")
+Rel(frontend, api, "Invoca endpoints", "HTTPS/JSON")
+Rel(api, mysql, "Lê e grava", "Sequelize/MySQL")
+Rel(api, mysql, "Grava Outbox na mesma transação", "Sequelize/MySQL")
+Rel(outbox, mysql, "Lê eventos pendentes", "Sequelize/MySQL")
+Rel(outbox, broker, "Publica", "AMQP/TLS")
+Rel(broker, discovery, "Entrega recipe.published.v1", "AMQP")
+Rel(broker, notification, "Entrega eventos", "AMQP")
+Rel(broker, moderation, "Entrega eventos", "AMQP")

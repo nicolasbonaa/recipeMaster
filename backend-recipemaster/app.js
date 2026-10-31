@@ -8,6 +8,10 @@ var indexRouter = require('./routes/index');
 var searchRoutes = require('./modules/search/searchRoutes');
 var userRoutes = require('./modules/user/userRoutes');
 var authRoutes = require('./modules/auth/authRoutes');
+var recipeRoutes = require('./modules/recipe/recipeRoutes');
+var likeRoutes = require('./modules/like/likeRoutes');
+var commentRoutes = require('./modules/comment/commentRoutes');
+var followRoutes = require('./modules/follow/followRoutes');
 var errorHandler = require('./middlewares/errorHandler');
 
 var app = express();
@@ -18,16 +22,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    creddentials: true
+    origin: [process.env.CORS_ORIGIN || 'http://localhost:5174', 'http://localhost:5174'],
+    credentials: true
 }));
 
-app.use('/uploads', express.static(path.join(_dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use('/api', indexRouter);
 app.use('/api', searchRoutes);
 app.use('/api', userRoutes);
 app.use('/api', authRoutes);
+app.use('/api', recipeRoutes);
+app.use('/api', likeRoutes);
+app.use('/api', commentRoutes);
+app.use('/api', followRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

@@ -3,10 +3,11 @@
 var app = require('../app');
 var http = require('http');
 var sequilize = require('../config/database');
+require('../config/associations');
 
 sequilize.authenticate()
     .then(() => {
-        return sequilize.sync();
+        return sequilize.sync({ alter: true });
     })
     .catch((error) => {
         console.error('Erro ao conectar com o banco de dados:', error);

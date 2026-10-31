@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "RecipeMaster - PDF 7 - Parte A",
+    "description": "Requests equivalentes aos curls da Parte A do PDF 7.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "email", "value": "seu-email@email.com" },
+    { "key": "password", "value": "sua-senha" },
+    { "key": "token", "value": "" },
+    { "key": "imagePath", "value": "C:\\caminho\\imagem.jpg" },
+    { "key": "invalidFilePath", "value": "C:\\caminho\\arquivo.txt" }
+  ],
+  "item": [
+    {
+      "name": "00 - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "const body = pm.response.json();",
+            "if (body.data && body.data.token) pm.collectionVariables.set('token', body.data.token);",
+            "pm.test('Login realizado com sucesso', () => pm.response.to.have.status(200));"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "01 - Upload valido (201)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Bolo de chocolate", "type": "text" },
+          { "key": "description", "value": "Bolo simples de chocolate com cobertura.", "type": "text" },
+          { "key": "image", "type": "file", "src": "{{imagePath}}" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    },
+    {
+      "name": "02 - Sem titulo (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "description", "value": "Bolo simples de chocolate.", "type": "text" },
+          { "key": "image", "type": "file", "src": "{{imagePath}}" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    },
+    {
+      "name": "03 - Sem descricao (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Bolo de chocolate", "type": "text" },
+          { "key": "image", "type": "file", "src": "{{imagePath}}" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    },
+    {
+      "name": "04 - Sem imagem (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Bolo de chocolate", "type": "text" },
+          { "key": "description", "value": "Teste sem imagem.", "type": "text" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    },
+    {
+      "name": "05 - Arquivo nao-imagem (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Teste arquivo invalido", "type": "text" },
+          { "key": "description", "value": "Teste de arquivo que nao e imagem.", "type": "text" },
+          { "key": "image", "type": "file", "src": "{{invalidFilePath}}" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    },
+    {
+      "name": "06 - Sem autenticacao (401)",
+      "request": {
+        "method": "POST",
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Teste sem autenticacao", "type": "text" },
+          { "key": "description", "value": "Teste de acesso sem token.", "type": "text" },
+          { "key": "image", "type": "file", "src": "{{imagePath}}" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      }
+    }
+  ]
+}

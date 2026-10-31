@@ -14,7 +14,7 @@
 				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 				<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
-				<FormCard v-if="profile" title="Meu perfil" subtitle="Mantenha seus dados atualizados.">
+				<FormCard v-if="profile" title="Meu perfil" subtitle="Mantenha seus dados atualizados." @submit="handleSubmit">
 					<div class="text-center mb-4">
 						<img :src="previewUrl || getProfileImageUrl(profile.profilePicture)" alt="Foto de perfil" class="profile-image mb-3">
 						<div>

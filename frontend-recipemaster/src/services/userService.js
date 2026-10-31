@@ -11,3 +11,7 @@ export function updateProfile(formData) {
     },
   })
 }
+
+export function getPublicProfile(username) {
+  return api.get(`/profile/${encodeURIComponent(username)}`)
+}

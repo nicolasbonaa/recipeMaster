@@ -1,6 +1,15 @@
 <template>
-<div class="p-4">
-<h1><!-- nome da sua tela --></h1>
-<p>Em construção.</p>
-</div>
+	<section class="upload-page p-4 p-lg-5"><div class="upload-header mb-4"><p class="eyebrow">Edição</p><h1 class="h2">Editar item</h1></div><div v-if="loading" class="feed-state">Carregando item...</div><div v-else-if="error && !recipe" class="alert alert-danger">{{ error }}</div><form v-else class="upload-form" @submit.prevent="submit"><label class="form-label" for="edit-title">Título</label><input id="edit-title" v-model.trim="form.title" class="form-control mb-3" maxlength="120"><label class="form-label" for="edit-description">Descrição</label><textarea id="edit-description" v-model.trim="form.description" class="form-control mb-3" rows="5" maxlength="500"></textarea><label class="form-label" for="edit-image">Imagem (opcional)</label><input id="edit-image" class="form-control mb-3" type="file" accept="image/*" @change="chooseImage"><img v-if="previewUrl" class="thumbnail-preview mb-3" :src="previewUrl" alt="Prévia da imagem"><div v-if="error" class="alert alert-danger">{{ error }}</div><button class="btn btn-brand" type="submit" :disabled="saving">{{ saving ? 'Salvando...' : 'Salvar alterações' }}</button></form></section>
 </template>
+
+<script setup>
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getRecipeForEdit, updateRecipe } from '../services/recipeService.js'
+import { getRecipeImageUrl } from '../utils/media.js'
+const route = useRoute(); const router = useRouter(); const recipe = ref(null); const loading = ref(true); const saving = ref(false); const error = ref(''); const selectedImage = ref(null); const previewUrl = ref(''); const form = reactive({ title: '', description: '' })
+async function load() { try { recipe.value = (await getRecipeForEdit(route.params.id)).data; form.title = recipe.value.title; form.description = recipe.value.description; previewUrl.value = getRecipeImageUrl(recipe.value.image) } catch (requestError) { error.value = requestError.message || 'Não foi possível carregar o item.' } finally { loading.value = false } }
+function chooseImage(event) { const [image] = event.target.files; if (!image) return; selectedImage.value = image; if (previewUrl.value.startsWith('blob:')) URL.revokeObjectURL(previewUrl.value); previewUrl.value = URL.createObjectURL(image) }
+async function submit() { error.value = ''; if (!form.title || !form.description) { error.value = 'Título e descrição são obrigatórios.'; return } saving.value = true; try { const data = new FormData(); data.append('title', form.title); data.append('description', form.description); if (selectedImage.value) data.append('image', selectedImage.value); await updateRecipe(route.params.id, data); router.push({ name: 'my-recipes' }) } catch (requestError) { error.value = requestError.message || 'Não foi possível salvar o item.' } finally { saving.value = false } }
+onMounted(load); onBeforeUnmount(() => { if (previewUrl.value.startsWith('blob:')) URL.revokeObjectURL(previewUrl.value) })
+</script>

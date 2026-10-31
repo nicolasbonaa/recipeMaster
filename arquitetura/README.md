@@ -25,6 +25,8 @@ conteúdo.
    exportação em PDF.
 5. [Relatório em PDF](./relatorio-n2.pdf) — arquivo pronto para publicação na
    atividade do Teams.
+6. [Roteiro de apresentação](./04-roteiro-apresentacao.md) — sequência,
+   falas sugeridas e perguntas prováveis para apresentar a análise.
 
 Os diagramas editáveis estão em:
 

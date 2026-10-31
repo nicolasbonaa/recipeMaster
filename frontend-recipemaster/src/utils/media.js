@@ -11,3 +11,9 @@ export function getProfileImageUrl(filename) {
 
   return `${mediaBaseUrl}/uploads/profiles/${filename}`
 }
+
+export function getRecipeImageUrl(filename) {
+  if (!filename) return ''
+  if (filename.startsWith('http://') || filename.startsWith('https://')) return filename
+  return `${mediaBaseUrl}/uploads/recipes/${filename}`
+}

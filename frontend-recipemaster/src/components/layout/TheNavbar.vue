@@ -16,8 +16,19 @@
 
 				<div class="d-flex align-items-center gap-2">
 					<template v-if="isAuthenticated">
-						<router-link class="btn btn-outline-secondary btn-sm" to="/perfil">Meu perfil</router-link>
-						<button class="btn btn-brand btn-sm" type="button" @click="handleLogout">Sair</button>
+						<div ref="avatarMenu" class="avatar-menu">
+							<button class="avatar-button" type="button" aria-label="Abrir menu do perfil" :aria-expanded="menuOpen" @click.stop="menuOpen = !menuOpen">
+								<img :src="getProfileImageUrl(profile?.profilePicture)" alt="" />
+								<span>{{ profile?.username || 'Perfil' }}</span>
+								<i class="bi bi-chevron-down" aria-hidden="true"></i>
+							</button>
+							<div v-if="menuOpen" class="avatar-menu__panel">
+								<router-link to="/perfil" @click="closeMenu">Editar Perfil</router-link>
+								<router-link v-if="profile?.username" :to="{ name: 'public-profile', params: { id: profile.username } }" @click="closeMenu">Ver Perfil</router-link>
+								<router-link to="/minhas-receitas" @click="closeMenu">Meus Itens</router-link>
+								<button type="button" @click="handleLogout">Sair</button>
+							</div>
+						</div>
 					</template>
 					<template v-else>
 						<router-link class="btn btn-outline-secondary btn-sm" to="/login">Entrar</router-link>
@@ -32,11 +43,28 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuth } from '../../composables/useAuth.js'
+import { getMyProfile } from '../../services/userService.js'
+import { getProfileImageUrl } from '../../utils/media.js'
+import { onMounted, ref, watch } from 'vue'
+import { useClickOutside } from '../../composables/useClickOutside.js'
 
 const { authStore, isAuthenticated } = useAuth()
 const router = useRouter()
+const avatarMenu = ref(null)
+const menuOpen = ref(false)
+const profile = ref(null)
+
+useClickOutside(avatarMenu, () => { menuOpen.value = false })
+async function loadProfile() {
+	if (!isAuthenticated.value) return
+	try { profile.value = (await getMyProfile()).data } catch { profile.value = null }
+}
+onMounted(loadProfile)
+watch(isAuthenticated, loadProfile)
+function closeMenu() { menuOpen.value = false }
 
 function handleLogout() {
+	closeMenu()
 	authStore.logout()
 	router.push({ name: 'login' })
 }

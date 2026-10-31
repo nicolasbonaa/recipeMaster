@@ -10,19 +10,23 @@ const routes = [
   // Feed e busca
   { path: '/feed', name: 'feed', component: () => import('../views/FeedView.vue'), meta: { requiresAuth: true } },
   { path: '/search', name: 'search', component: () => import('../views/SearchView.vue'), meta: { requiresAuth: true } },
+  { path: '/seguindo', name: 'following-feed', component: () => import('../views/FollowingFeedView.vue'), meta: { requiresAuth: true } },
 
   // Receitas
   { path: '/receitas/upload', name: 'upload-recipe', component: () => import('../views/UploadView.vue'), meta: { requiresAuth: true } },
-  { path: '/receitas/:id', name: 'recipe-detail', component: () => import('../views/RecipeDetailView.vue'), meta: { requiresAuth: true } },
   { path: '/receitas/:id/editar', name: 'edit-recipe', component: () => import('../views/EditRecipeView.vue'), meta: { requiresAuth: true } },
+  { path: '/receitas/:id', name: 'recipe-detail', component: () => import('../views/RecipeDetailView.vue') },
   { path: '/minhas-receitas', name: 'my-recipes', component: () => import('../views/MyRecipesView.vue'), meta: { requiresAuth: true } },
 
-  // Favoritos
+  // Itens curtidos
   { path: '/favoritos', name: 'my-favorites', component: () => import('../views/favorites/MyFavoritesView.vue'), meta: { requiresAuth: true } },
 
   // Perfil
   { path: '/perfil', name: 'my-profile', component: () => import('../views/profile/MyProfileView.vue'), meta: { requiresAuth: true } },
   { path: '/perfil/:id', name: 'public-profile', component: () => import('../views/profile/PublicProfileView.vue') },
+  // Uma tela, duas rotas: o "tipo" da lista vem da própria rota via props.
+  { path: '/perfil/:id/seguidores', name: 'profile-followers', component: () => import('../views/profile/FollowListView.vue'), props: { kind: 'followers' } },
+  { path: '/perfil/:id/seguindo', name: 'profile-following', component: () => import('../views/profile/FollowListView.vue'), props: { kind: 'following' } },
 
   // Administração
   { path: '/admin', name: 'admin-dashboard', component: () => import('../views/admin/AdminDashboardView.vue'), meta: { requiresAuth: true } },

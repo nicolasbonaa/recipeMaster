@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const auth = require('../../middlewares/auth');
 const fs = require('fs/promises');
 const path = require('path');
+const Recipe = require('../recipe/recipeModel');
+const Follow = require('../follow/followModel');
 
 const PROFILE_UPLOADS_DIR = path.join(__dirname, '../../public/uploads/profiles');
 const DEFAULT_PROFILE = 'default-profile.png';
@@ -48,10 +50,16 @@ async function registerUser(username, email, password, fullName){
 
 }
 
-async function getPublicProfile(username){
+async function getPublicProfile(username, viewerId){
     const user = await User.findOne({
         where: { username },
-        attributes: ['id', 'username', 'fullName', 'bio', 'profilePicture', 'followersCount', 'followingCount', 'recipesCount']
+        attributes: ['id', 'username', 'fullName', 'bio', 'profilePicture', 'followersCount', 'followingCount', 'recipesCount'],
+        include: [{
+            model: Recipe,
+            as: 'recipes',
+            include: [{ model: User, as: 'author', attributes: ['id', 'username', 'fullName', 'profilePicture'] }]
+        }],
+        order: [[{ model: Recipe, as: 'recipes' }, 'createdAt', 'DESC']]
     })
 
     if(!user){
@@ -60,7 +68,19 @@ async function getPublicProfile(username){
         throw error;
     }
 
-    return profileData(user);
+    const isOwner = Boolean(viewerId) && Number(viewerId) === Number(user.id);
+
+    // Só consulta quando há alguém logado olhando o perfil de OUTRA pessoa.
+    const isFollowing = viewerId && !isOwner
+        ? Boolean(await Follow.findOne({ where: { followerId: Number(viewerId), followingId: user.id } }))
+        : false;
+
+    return {
+        ...profileData(user),
+        recipes: user.recipes || [],
+        isOwner,
+        isFollowing
+    };
 }
 
 async function getUserProfile(id){

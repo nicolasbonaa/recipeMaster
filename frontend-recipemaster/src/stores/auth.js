@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { login as loginRequest } from '../services/authService'
+import { STORAGE_KEYS } from '../config/constants.js'
 
-const TOKEN_KEY = 'recipeMaster_token'
+const TOKEN_KEY = STORAGE_KEYS.TOKEN
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

@@ -66,6 +66,7 @@ import { getPublicProfile } from '../../services/userService.js'
 import { getFollowers, getFollowing } from '../../services/followService.js'
 import { getProfileImageUrl } from '../../utils/media.js'
 import { formatCount } from '../../utils/format.js'
+import { useAsyncData } from '../../composables/useAsyncData.js'
 
 // kind vem da definição da rota: props: { kind: 'followers' } ou { kind: 'following' }
 const props = defineProps({
@@ -77,6 +78,13 @@ const profile = ref(null)
 const users = ref([])
 const loading = ref(true)
 const error = ref('')
+const { execute } = useAsyncData(async () => {
+	const publicProfile = (await getPublicProfile(username.value)).data
+	const response = props.kind === 'followers'
+		? await getFollowers(publicProfile.id)
+		: await getFollowing(publicProfile.id)
+	return { profile: publicProfile, users: response.data || [] }
+})
 
 // O parâmetro :id destas rotas é o username (mesmo padrão do perfil público).
 const username = computed(() => route.params.id)
@@ -95,12 +103,9 @@ async function loadList() {
 	users.value = []
 	try {
 		// 1) A rota tem o username, mas a API de listas usa o id: primeiro o perfil...
-		profile.value = (await getPublicProfile(username.value)).data
-		// 2) ...depois a lista certa, com o id do perfil.
-		const response = props.kind === 'followers'
-			? await getFollowers(profile.value.id)
-			: await getFollowing(profile.value.id)
-		users.value = response.data || []
+		const result = await execute()
+		profile.value = result.profile
+		users.value = result.users
 	} catch (requestError) {
 		profile.value = null
 		error.value = requestError.message || 'Não foi possível carregar a lista.'

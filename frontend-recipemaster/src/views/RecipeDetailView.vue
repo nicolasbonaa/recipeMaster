@@ -31,21 +31,15 @@ import LikeButton from '../components/LikeButton.vue'
 import CommentSection from '../components/CommentSection.vue'
 import { formatCount } from '../utils/format.js'
 import { getRecipeImageUrl } from '../utils/media.js'
+import { useAsyncData } from '../composables/useAsyncData.js'
 
 const route = useRoute()
 const recipe = ref(null)
-const loading = ref(true)
-const error = ref('')
+const { data, loading, error, execute } = useAsyncData(() => getRecipeById(route.params.id))
 
 async function loadRecipe() {
-	try {
-		const response = await getRecipeById(route.params.id)
-		recipe.value = response.data
-	} catch (requestError) {
-		error.value = requestError.message || 'Receita não encontrada.'
-	} finally {
-		loading.value = false
-	}
+	const response = await execute()
+	recipe.value = response.data
 }
 
 function updateLike({ liked, likesCount }) {

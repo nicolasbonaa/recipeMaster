@@ -9,16 +9,16 @@
 		<form class="upload-form" @submit.prevent="handleSubmit" novalidate>
 			<div class="mb-3">
 				<label class="form-label" for="title">Título</label>
-				<input id="title" v-model.trim="form.title" class="form-control" :class="{ 'is-invalid': errors.title }" maxlength="120" placeholder="Ex.: Risoto de cogumelos" />
+				<input id="title" v-model.trim="form.title" class="form-control" :class="{ 'is-invalid': errors.title }" :maxlength="LIMITS.TITLE_MAX" placeholder="Ex.: Risoto de cogumelos" />
 				<div v-if="errors.title" class="invalid-feedback">{{ errors.title }}</div>
 			</div>
 
 			<div class="mb-3">
 				<label class="form-label" for="description">Descrição</label>
-				<textarea id="description" v-model.trim="form.description" class="form-control" :class="{ 'is-invalid': errors.description }" maxlength="500" rows="5" placeholder="Conte um pouco sobre o prato e o modo de preparo."></textarea>
+				<textarea id="description" v-model.trim="form.description" class="form-control" :class="{ 'is-invalid': errors.description }" :maxlength="LIMITS.DESCRIPTION_MAX" rows="5" placeholder="Conte um pouco sobre o prato e o modo de preparo."></textarea>
 				<div class="d-flex justify-content-between">
 					<div v-if="errors.description" class="text-danger small mt-1">{{ errors.description }}</div>
-					<small class="text-secondary ms-auto mt-1">{{ form.description.length }}/500</small>
+					<small class="text-secondary ms-auto mt-1">{{ form.description.length }}/{{ LIMITS.DESCRIPTION_MAX }}</small>
 				</div>
 			</div>
 
@@ -48,6 +48,7 @@
 <script setup>
 import { onBeforeUnmount, reactive, ref } from 'vue'
 import { createRecipe } from '../services/recipeService.js'
+import { LIMITS } from '../config/constants.js'
 
 const form = reactive({ title: '', description: '', image: null })
 const errors = reactive({ title: '', description: '', image: '' })

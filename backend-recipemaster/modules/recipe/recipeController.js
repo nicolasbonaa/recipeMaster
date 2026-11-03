@@ -1,5 +1,6 @@
 const recipeService = require('./recipeService');
 const { success } = require('../../middlewares/apiResponse');
+const { parsePagination } = require('../../utils/pagination');
 
 exports.create = async (req, res) => {
     const recipe = await recipeService.createRecipe({
@@ -18,8 +19,7 @@ exports.getDetails = async (req, res) => {
 };
 
 exports.getFeed = async (req, res) => {
-    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
-    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 6, 1), 50);
+    const { page, limit } = parsePagination(req.query);
     const recipes = await recipeService.getFeed(page, limit);
     return success(res, recipes);
 };

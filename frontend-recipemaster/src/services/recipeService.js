@@ -1,12 +1,14 @@
 import api from './api.js'
+import { PAGE_SIZE } from '../config/constants.js'
 
 export function createRecipe(formData, onUploadProgress) {
   return api.post('/recipes', formData, {
     onUploadProgress,
+    silent: true,
   })
 }
 
-export function getFeed(page = 1, limit = 6) {
+export function getFeed(page = 1, limit = PAGE_SIZE) {
   return api.get('/feed', { params: { page, limit } })
 }
 
@@ -25,6 +27,7 @@ export function getRecipeForEdit(id) {
 export function updateRecipe(id, formData) {
   return api.put(`/recipes/${id}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    silent: true,
   })
 }
 

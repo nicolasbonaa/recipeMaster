@@ -1,0 +1,236 @@
+<USER_REQUEST>
+Atividade PrÃ¡tica - Aula 11
+Seguir Pessoas, Seguidores/Seguindo e o Feed
+de Quem Eu Sigo (Trilhas API + Frontend)
+Baseado em: roteiro da Aula 11 â€” trilha API (Shortz-App API) e roteiro da Aula 11 â€” trilha
+Frontend (Shortz-App)
+AplicaÃ§Ã£o: este enunciado vale para qualquer projeto sorteado na Lista de Projetos para
+ProgramaÃ§Ã£o Web â€” use a mesma ficha de preparaÃ§Ã£o das aulas anteriores, reaproveitando os
+campos jÃ¡ preenchidos (nome do model da sua entidade, rota, nome dos contadores). Seguir Ã©
+uma relaÃ§Ã£o entre usuÃ¡rios, nÃ£o entre usuÃ¡rio e entidade; por isso a maior parte do trabalho de
+hoje Ã© idÃªntica para todo mundo, e sÃ³ o feed de quem eu sigo depende da sua entidade
+principal. O Grupo A/B tambÃ©m nÃ£o muda nada.
+PrÃ©-requisito: Atividade 10 concluÃ­da nas duas trilhas â€” curtir/comentar com transaÃ§Ãµes,
+atualizaÃ§Ã£o otimista no front, perfil pÃºblico com a lista de itens da pessoa, optionalAuth , e trÃªs
+contas de usuÃ¡rio para os testes (duas nÃ£o bastam: veja a Parte A, Etapa 4).
+âš ï¸ Ordem de execuÃ§Ã£o: faÃ§a a Parte A (API) antes da Parte B (Frontend), como nas
+atividades anteriores.
+1. Objetivo
+Ao final desta atividade, vocÃª deve ter, no seu prÃ³prio projeto:
+Do lado do back-end (API):
+Uma tabela follows que liga usuÃ¡rio a usuÃ¡rio, com apelidos ( Follower / Following ) nas
+associaÃ§Ãµes e com Ã­ndice Ãºnico composto mais um Ã­ndice em following_id ;
+POST /api/users/:userId/toggle-follow com trÃªs escritas em uma transaÃ§Ã£o (a linha e os
+dois contadores), 400 para id invÃ¡lido e para "seguir a si mesmo", 404 para usuÃ¡rio
+inexistente;
+GET .../follow-status , e as listas pÃºblicas GET .../followers e GET .../following ;
+isFollowing no perfil pÃºblico (a pendÃªncia que a Atividade 09 deixou);
+GET /api/following-<suas-entidades> , o feed filtrado pelas pessoas que o usuÃ¡rio segue,
+com page / limit .
+Do lado do front-end:
+Um FollowButton com atualizaÃ§Ã£o otimista que compartilha o estado com o perfil por vmodel ( defineModel ), de modo que o contador de seguidores do perfil muda junto com o
+botÃ£o;
+As telas de Seguidores e Seguindo (uma sÃ³ implementaÃ§Ã£o, duas rotas, por props da rota),
+com abas e estados vazios;
+A tela do feed de quem eu sigo, com rota e "Carregar mais", alcanÃ§Ã¡vel pelo item da
+Sidebar;
+Comportamento correto para visitante (seguir leva ao login e volta ao perfil).
+VocÃª tambÃ©m deve ser capaz de explicar com suas palavras:
+Por que uma tabela que liga a mesma tabela duas vezes precisa de apelidos ( as ), e como
+vocÃª "lÃª em voz alta" getFollowers e getFollowing sem trocÃ¡-las;
+Por que a ordem das colunas num Ã­ndice composto importa, e por que a tabela tem um
+segundo Ã­ndice;
+Por que followerId === followingId nunca dava true quando o id vinha direto de
+req.params , e onde a conversÃ£o deve acontecer;
+Em que situaÃ§Ã£o usar v-model / defineModel em vez do padrÃ£o "valor inicial â†’ estado
+prÃ³prio" da Atividade 10;
+Por que, com defineModel , ler o valor logo depois de atribuÃ­-lo devolve o antigo, e como
+evitar isso;
+Por que o feed filtrado devolve [] cedo quando vocÃª nÃ£o segue ninguÃ©m.
+2. Antes de comeÃ§ar: adapte os nomes Ã  sua entidade
+Confirme (nada novo na ficha, sÃ³ anote o que vai usar):
+Nome
+Exemplo (ShortzApp)
+O seu projeto
+Contador de seguidores no
+model User
+followersCount
+Contador de seguindo no model
+User
+followingCount
+Rota do feed filtrado
+/api/followingvideos
+/api/following-<suasentidades>
+ðŸ’¡ Os dois contadores do User jÃ¡ existem desde a Atividade 02 (e estavam em 0 ). Se, no
+seu projeto, tiverem outro nome, use o seu.
+PARTE A â€” Backend
+3. Etapa 1 â€” Model Follow e AssociaÃ§Ãµes
+1. Crie modules/follow/followModel.js (Bloco 3.1 do roteiro de API): followerId e
+followingId , ambos references: users , Ã­ndice Ãºnico ['follower_id', 'following_id'] e
+o Ã­ndice simples ['following_id'] .
+2. Em config/associations.js , importe o model e declare as duas associaÃ§Ãµes com apelido:
+Follow.belongsTo(User, { as: 'Follower', foreignKey: 'followerId' });
+Follow.belongsTo(User, { as: 'Following', foreignKey: 'followingId' });
+3. Reinicie a API e confira no banco que a tabela follows existe, com os dois Ã­ndices.
+Checklist desta etapa:
+followModel.js criado, com os dois Ã­ndices
+ AssociaÃ§Ãµes com apelidos declaradas
+ Tabela e Ã­ndices conferidos no banco
+4. Etapa 2 â€” Service, Controller e Rotas
+Siga o Bloco 4 do roteiro de API. O conteÃºdo Ã© o mesmo para todo mundo (usuÃ¡rio â†” usuÃ¡rio),
+com um ponto de atenÃ§Ã£o: troque sÃ³ os nomes dos seus contadores do User .
+followService : toggleFollow ( 400 se for a prÃ³pria pessoa â†’ 404 se o alvo nÃ£o existe â†’
+transaÃ§Ã£o com findOrCreate e os dois contadores, todos com { transaction: t } â†’
+reload() do alvo â†’ { isFollowing, followersCount } ), getFollowStatus (booleano),
+getFollowers e getFollowing (com include usando o apelido certo e .map para entregar
+sÃ³ as pessoas);
+followController : com parseUserId (converte req.params.userId em nÃºmero e responde
+400 se nÃ£o for um inteiro positivo), 201 / 200 no toggle, e o handler do feed filtrado;
+followRoutes : toggle-follow e follow-status autenticadas; followers e following
+pÃºblicas; o feed filtrado autenticado;
+Registre followRoutes no app.js , antes do 404 e do errorHandler .
+âš ï¸ TrÃªs pontos que quase todo mundo erra: (1) trocar getFollowers por getFollowing
+(releia o Bloco 2.1 do roteiro de API em voz alta antes de escrever os where ); (2) trocar os
+where dos dois contadores ( followersCount sobe no seguido; followingCount , em quem
+segue); (3) esquecer a conversÃ£o para nÃºmero â€” e entÃ£o conseguir seguir a si mesmo sem
+nenhum erro.
+Checklist desta etapa:
+ TrÃªs arquivos do mÃ³dulo follow , registrados no app.js
+parseUserId convertendo o id na borda
+ TrÃªs escritas (linha + dois contadores) numa sÃ³ transaÃ§Ã£o
+5. Etapa 3 â€” Feed Filtrado e isFollowing no Perfil
+1. No service da sua entidade, crie getFollowing<SuasEntidades>(userId, page, limit) :
+primeiro Follow.findAll({ where: { followerId: userId }, attributes: ['followingId']
+}) e um .map para um array de nÃºmeros; se o array for vazio, return [] ; senÃ£o, o mesmo
+findAll do seu feed (Atividade 08) com where: { userId: { [Op.in]: followedIds } }
+(importe Op de sequelize ).
+2. No controller do follow , o handler do feed lÃª page / limit (padrÃµes 1 e 12 ) e chama o
+service acima.
+3. No userController.getPublicProfile , devolva isFollowing â€” sÃ³ consultado quando hÃ¡
+usuÃ¡rio logado e ele nÃ£o Ã© o dono do perfil; senÃ£o, false .
+Checklist desta etapa:
+ Feed filtrado com Op.in , paginado, devolvendo [] para quem nÃ£o segue ninguÃ©m
+isFollowing no perfil pÃºblico
+6. Etapa 4 â€” Testando
+FaÃ§a os testes do Bloco 8 do roteiro de API, adaptados aos seus nomes. Use trÃªs contas (A, B e
+C):
+1. toggle-follow sem token 401 ; id abc â†’ 400 ; seguir a si mesmo â†’ 400 ; usuÃ¡rio 99999
+â†’ 404 .
+2. A segue B â†’ 201 , followersCount: 1 ; A de novo â†’ 200 , 0 ; de novo â†’ 201 , 1 ; C segue
+B â†’ 2 ; B segue A.
+3. Contadores dos dois lados: B com 2 seguidores e 1 seguindo; A com 1 e 1; C com 0 e 1.
+4. follow-status e isFollowing no perfil: visitante false ; A olhando B true ; C olhando A
+false ; B olhando o prÃ³prio perfil false (e isOwner: true ).
+5. followers de B â†’ quem segue B (C e A, a mais recente primeiro); following de A â†’ quem
+A segue; sem password nos itens; usuÃ¡rio inexistente 404 .
+6. Feed filtrado: sem token 401 ; A (segue B) vÃª sÃ³ os itens de B; ?page=2&limit=1 â†’ [] se B
+tem 1 item; uma conta que nÃ£o segue ninguÃ©m â†’ [] .
+7. No banco, tente inserir uma linha repetida em follows â†’ o banco recusa.
+8. RegressÃ£o: curtir, comentar, upload, ediÃ§Ã£o e exclusÃ£o; GET /feed como antes.
+Checklist desta etapa:
+ Os oito testes acima executados com sucesso
+PARTE B â€” Frontend
+7. ContextualizaÃ§Ã£o rÃ¡pida e Checagem de AlcanÃ§abilidade (ADR-012)
+Responda antes de programar (no checklists.md ou em um comentÃ¡rio no topo da sua tela de
+feed filtrado):
+PeÃ§a Caminho(s) de clique que vocÃª vai construir
+Seguir / deixar de seguir botÃ£o no perfil pÃºblico de outra pessoa; visitante â†’ login â†’
+volta ao perfil
+Listas de
+seguidores/seguindo
+os nÃºmeros "Seguidores"/"Seguindo" do perfil viram links;
+abas entre as duas listas; link de volta
+Feed filtrado um clique a partir de uma tela existente (o item "Seguindo" da
+Sidebar)
+âš ï¸ Verifique antes de programar: no TheSidebar.vue do seu projeto, o router-link de
+"Seguindo" (ou equivalente) aponta para um path que existe no seu router/index.js ? Se
+nÃ£o, ajuste um dos dois â€” e registre o que fez no checklists.md . (Na Shortz-App, o link
+existia, mas a rota sÃ³ nasceu na Aula 11.)
+8. Etapa 1 â€” Service
+Crie services/followService.js com toggleFollow(userId) , getFollowers(userId) ,
+getFollowing(userId) e getFollowing<SuasEntidades>(page, limit) (Bloco 3 do roteiro de
+Frontend).
+Checklist desta etapa:
+followService.js criado
+9. Etapa 2 â€” FollowButton com defineModel
+Crie o componente (Bloco 4 do roteiro de Frontend): prop userId ; dois defineModel
+( following e followersCount ); visitante â†’ login com redirect ; isBusy ; atualizaÃ§Ã£o otimista
+em trÃªs passos usando uma variÃ¡vel local para o novo estado ( nowFollowing ), nunca lendo
+following.value logo apÃ³s atribuÃ­-lo.
+Checklist desta etapa:
+FollowButton com defineModel , otimista, com rollback e isBusy
+ Sem a leitura "logo apÃ³s atribuir"
+10. Etapa 3 â€” Perfil PÃºblico Ativo
+Na sua tela de perfil pÃºblico: troque o placeholder pelo FollowButton , ligado com vmodel:following="profile.isFollowing" e v-model:followers-count="profile.followersCount" ;
+o botÃ£o aparece para todos que nÃ£o sÃ£o o dono (o visitante Ã© levado ao login); e os nÃºmeros
+"Seguidores"/"Seguindo" viram router-link s para as listas.
+Checklist desta etapa:
+ BotÃ£o ativo, com o contador do cartÃ£o mudando junto
+ NÃºmeros do perfil viram links
+11. Etapa 4 â€” Listas e Feed Filtrado
+1. FollowListView : uma tela para as duas rotas, recebendo kind da definiÃ§Ã£o da rota
+( props: { kind: 'followers' } / 'following' ); duas chamadas em sequÃªncia (perfil â†’
+lista, porque a rota usa o username e a API usa o id); watch(() => [props.kind,
+route.params.username], loadList, { immediate: true }) ; abas com a ativa vinda de kind ;
+estados vazios com o nome da pessoa;
+2. Tela do feed filtrado: a mesma estrutura do seu Feed (Atividade 08), com
+page / hasMore /"Carregar mais" e um estado vazio com link para o Feed;
+3. Rotas no router/index.js : o feed filtrado ( requiresAuth , mesmo path do link da Sidebar)
+e as duas rotas de lista (pÃºblicas).
+Checklist desta etapa:
+ Uma tela de lista, duas rotas, abas funcionando
+ Feed filtrado com rota e acessÃ­vel pela Sidebar
+12. Etapa 5 â€” Teste PrÃ¡tico Completo (sÃ³ de clique em clique)
+1. Visitante (janela anÃ´nima): o botÃ£o aparece; o clique leva ao login e volta ao perfil depois de
+entrar.
+2. Logado: "Seguir" muda botÃ£o e contador do cartÃ£o na hora; F5 mantÃ©m; "Seguindo" desfaz.
+3. DevTools â†’ Slow 4G: a mudanÃ§a Ã© instantÃ¢nea. Offline: muda e volta atrÃ¡s, com a
+mensagem de erro.
+4. Confira que o contador nunca vai para -1 ao seguir.
+5. No seu perfil, nÃ£o hÃ¡ botÃ£o de seguir; os nÃºmeros sÃ£o links.
+6. Seguidores â†’ Seguindo (aba): troca sem recarregar a pÃ¡gina; clicar em uma pessoa leva ao
+perfil dela; usuÃ¡rio inexistente mostra o erro; listas vazias mostram a mensagem.
+7. Troque de uma pessoa que vocÃª segue para uma que nÃ£o segue: o botÃ£o reflete a pessoa
+nova.
+8. Pela Sidebar, abra o feed filtrado: sÃ³ itens de quem vocÃª segue; deixe de seguir uma pessoa
+e confira que os itens dela saÃ­ram.
+9. RegressÃ£o: Perfil (editar, itens), Feed, Detalhe (curtir/comentar), Meus Itens, Curtidas,
+Login/Logout.
+Checklist desta etapa:
+ Os nove passos acima testados em sequÃªncia, a partir do login
+13. Entrega
+Envie em resposta a esta tarefa:
+1. Na subpasta 01 - Docs do seu projeto frontend, dentro de uma nova subpasta
+atividade11 :
+Um print do perfil de outra pessoa com o botÃ£o "Seguindo" e o contador atualizado,
+em .jpg , com o nome seguindo.jpg ;
+Um print da aba Network com o throttling ligado e o botÃ£o jÃ¡ alterado, em .jpg , com
+o nome otimista.jpg ;
+Um print da mensagem de rollback (Offline), em .jpg , com o nome rollback.jpg ;
+Um print da lista de Seguidores com as abas, em .jpg , com o nome seguidores.jpg ;
+Um print do feed filtrado, em .jpg , com o nome feed-seguindo.jpg ;
+Um print do cliente de banco mostrando a tabela follows , seus Ã­ndices e a recusa de
+uma linha repetida, em .jpg , com o nome follows.jpg ;
+Um print de cada curl da Parte A, Etapa 4, em .jpg ;
+Um respostas.md com um parÃ¡grafo curto para cada uma das seis perguntas da
+SeÃ§Ã£o 1 ("VocÃª tambÃ©m deve ser capaz de explicar...");
+Atualize checklists.md com todos os checklists desta atividade marcados.
+2. Um .zip do seu projeto de back-end (sem node_modules ), nomeado <NomeSobrenome>-
+<NomeProjeto>-backend.zip , incluindo o mÃ³dulo follow ;
+3. Um .zip do seu projeto de front-end (sem node_modules ), nomeado <NomeSobrenome>-
+<NomeProjeto>-frontend.zip , incluindo FollowButton , as duas telas novas e o
+router/index.js atualizado.
+
+Vamos fazer a implementaÃ§Ã£o de tudo o que se pede na atividade listada a cima. 
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-31T13:30:13-03:00.
+
+The user's current state is as follows:
+Running terminal commands:
+- npm run dev (in c:\Users\vinitop\recipeMaster2\backend-recipemaster, running for 1h45m2s)
+- npm run dev (in c:\Users\vinitop\recipeMaster2\frontend-recipemaster, running for 1h44m47s)
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Claude Opus 5.5 (Medium). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

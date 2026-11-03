@@ -22,12 +22,16 @@ import { useRouter } from 'vue-router'
 import RecipeCard from '../components/RecipeCard.vue'
 import BaseModal from '../components/base/BaseModal.vue'
 import { deleteRecipe, getMyRecipes } from '../services/recipeService.js'
+import { useToast } from '../composables/useToast.js'
+import { useAsyncData } from '../composables/useAsyncData.js'
 
-const router = useRouter(); const recipes = ref([]); const loading = ref(true); const error = ref(''); const recipeToDelete = ref(null); const deleting = ref(false)
-async function loadRecipes() { try { recipes.value = (await getMyRecipes()).data || [] } catch (requestError) { error.value = requestError.message || 'Não foi possível carregar seus itens.' } finally { loading.value = false } }
+const router = useRouter(); const recipes = ref([]); const recipeToDelete = ref(null); const deleting = ref(false)
+const { addToast } = useToast()
+const { loading, error, execute } = useAsyncData(getMyRecipes)
+async function loadRecipes() { recipes.value = (await execute()).data || [] }
 function openRecipe(recipe) { router.push({ name: 'recipe-detail', params: { id: recipe.id } }) }
 function askDelete(recipe) { recipeToDelete.value = recipe }
 function closeDelete() { if (!deleting.value) recipeToDelete.value = null }
-async function confirmDelete() { deleting.value = true; try { await deleteRecipe(recipeToDelete.value.id); recipes.value = recipes.value.filter((recipe) => recipe.id !== recipeToDelete.value.id); closeDelete() } catch (requestError) { error.value = requestError.message || 'Não foi possível excluir o item.' } finally { deleting.value = false } }
+async function confirmDelete() { deleting.value = true; try { await deleteRecipe(recipeToDelete.value.id); recipes.value = recipes.value.filter((recipe) => recipe.id !== recipeToDelete.value.id); closeDelete(); addToast('Receita excluída com sucesso.', 'success') } catch (requestError) { error.value = requestError.message || 'Não foi possível excluir o item.' } finally { deleting.value = false } }
 onMounted(loadRecipes)
 </script>

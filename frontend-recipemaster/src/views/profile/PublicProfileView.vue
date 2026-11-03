@@ -59,23 +59,17 @@ import { getProfileImageUrl } from '../../utils/media.js'
 import { formatCount } from '../../utils/format.js'
 import RecipeCard from '../../components/RecipeCard.vue'
 import FollowButton from '../../components/FollowButton.vue'
+import { useAsyncData } from '../../composables/useAsyncData.js'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref(null)
-const loading = ref(true)
-const error = ref('')
+const { loading, error, execute } = useAsyncData(() => getPublicProfile(route.params.id))
 
 async function load() {
 	loading.value = true
 	error.value = ''
-	try {
-		profile.value = (await getPublicProfile(route.params.id)).data
-	} catch (requestError) {
-		error.value = requestError.message || 'Perfil não encontrado.'
-	} finally {
-		loading.value = false
-	}
+	profile.value = (await execute()).data
 }
 
 function openRecipe(item) {

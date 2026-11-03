@@ -1,6 +1,7 @@
 const followService = require('./followService');
 const recipeService = require('../recipe/recipeService');
 const { success, error } = require('../../middlewares/apiResponse');
+const { parsePagination } = require('../../utils/pagination');
 
 /**
  * req.params.userId chega SEMPRE como string ("5"). Sem converter, req.user.id (5) === "5" é false
@@ -52,8 +53,7 @@ exports.following = async (req, res) => {
 };
 
 exports.followingRecipes = async (req, res) => {
-    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
-    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 12, 1), 50);
+    const { page, limit } = parsePagination(req.query);
     const recipes = await recipeService.getFollowingRecipes(Number(req.user.id), page, limit);
     return success(res, recipes);
 };

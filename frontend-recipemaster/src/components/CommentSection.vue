@@ -10,9 +10,9 @@
 
     <form v-if="isAuthenticated" class="comment-form" @submit.prevent="submitComment">
       <label for="comment-content">Deixe um comentário</label>
-      <textarea id="comment-content" v-model="content" rows="3" maxlength="500" placeholder="Compartilhe uma ideia sobre esta receita."></textarea>
+      <textarea id="comment-content" v-model="content" rows="3" :maxlength="LIMITS.COMMENT_MAX" placeholder="Compartilhe uma ideia sobre esta receita."></textarea>
       <div class="comment-form__footer">
-        <span>{{ content.length }}/500</span>
+        <span>{{ content.length }}/{{ LIMITS.COMMENT_MAX }}</span>
         <button class="btn btn-brand" type="submit" :disabled="isSubmitting">{{ isSubmitting ? 'Publicando...' : 'Comentar' }}</button>
       </div>
       <p v-if="formError" class="comments-section__error" role="alert">{{ formError }}</p>
@@ -39,6 +39,8 @@ import { onMounted, ref, watch } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
 import { createComment, getComments } from '../services/commentService.js'
 import { formatCount, formatDate } from '../utils/format.js'
+import { LIMITS } from '../config/constants.js'
+import { useAsyncData } from '../composables/useAsyncData.js'
 
 const props = defineProps({
   recipeId: { type: [Number, String], required: true },
@@ -47,23 +49,14 @@ const emit = defineEmits(['count-change'])
 const { isAuthenticated } = useAuth()
 const comments = ref([])
 const content = ref('')
-const loading = ref(true)
+const { loading, error, execute } = useAsyncData(() => getComments(props.recipeId))
 const isSubmitting = ref(false)
-const error = ref('')
 const formError = ref('')
 
 async function loadComments() {
-  loading.value = true
-  error.value = ''
-  try {
-    const response = await getComments(props.recipeId)
-    comments.value = response.data || []
-    emit('count-change', comments.value.length)
-  } catch (requestError) {
-    error.value = requestError.message || 'Não foi possível carregar os comentários.'
-  } finally {
-    loading.value = false
-  }
+  const response = await execute()
+  comments.value = response.data || []
+  emit('count-change', comments.value.length)
 }
 
 async function submitComment() {
@@ -73,8 +66,8 @@ async function submitComment() {
     formError.value = 'Escreva um comentário antes de publicar.'
     return
   }
-  if (trimmedContent.length > 500) {
-    formError.value = 'O comentário deve ter no máximo 500 caracteres.'
+  if (trimmedContent.length > LIMITS.COMMENT_MAX) {
+    formError.value = `O comentário deve ter no máximo ${LIMITS.COMMENT_MAX} caracteres.`
     return
   }
 

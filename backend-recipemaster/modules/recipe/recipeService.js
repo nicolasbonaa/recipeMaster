@@ -7,6 +7,7 @@ const Follow = require('../follow/followModel');
 const { Op } = require('sequelize');
 const fs = require('fs/promises');
 const path = require('path');
+const { PAGINATION } = require('../../config/constants');
 
 const RECIPE_UPLOADS_DIR = path.join(__dirname, '../../public/uploads/recipes');
 
@@ -47,7 +48,7 @@ async function getRecipeDetails(id, viewerId) {
     };
 }
 
-async function getFeed(page = 1, limit = 6) {
+async function getFeed(page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT) {
     const offset = (page - 1) * limit;
     return Recipe.findAll({
         order: [['createdAt', 'DESC']],
@@ -58,7 +59,7 @@ async function getFeed(page = 1, limit = 6) {
 }
 
 // Feed só com receitas de quem userId segue.
-async function getFollowingRecipes(userId, page = 1, limit = 12) {
+async function getFollowingRecipes(userId, page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT) {
     const follows = await Follow.findAll({ where: { followerId: userId }, attributes: ['followingId'] });
     const followedIds = follows.map((follow) => Number(follow.followingId));
 

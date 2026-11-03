@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '../../services/authService'
+import { LIMITS } from '../../config/constants.js'
 import BaseButton from '../../components/base/BaseButton.vue'
 import BaseInput from '../../components/base/BaseInput.vue'
 import FormCard from '../../components/base/FormCard.vue'
@@ -37,11 +38,11 @@ function validate() {
     }
 
     if (
-        form.username.trim().length < 3 ||
-        form.username.trim().length > 20
+        form.username.trim().length < LIMITS.USERNAME_MIN ||
+        form.username.trim().length > LIMITS.USERNAME_MAX
     ) {
         errors.username =
-            'O nome de usuário deve ter entre 3 e 20 caracteres.'
+            `O nome de usuário deve ter entre ${LIMITS.USERNAME_MIN} e ${LIMITS.USERNAME_MAX} caracteres.`
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -50,9 +51,9 @@ function validate() {
         errors.email = 'Informe um e-mail válido.'
     }
 
-    if (form.password.length < 6) {
+    if (form.password.length < LIMITS.PASSWORD_MIN) {
         errors.password =
-            'A senha deve ter pelo menos 6 caracteres.'
+            `A senha deve ter pelo menos ${LIMITS.PASSWORD_MIN} caracteres.`
     }
 
     if (form.confirmPassword !== form.password) {

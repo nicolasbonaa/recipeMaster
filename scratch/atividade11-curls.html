@@ -1,0 +1,37 @@
+﻿<html><head><meta charset="utf-8"><style>body{background:#171717;color:#eee;font-family:Consolas,monospace;padding:24px}.card{width:1100px;margin:0 auto 30px;background:#202020;border:1px solid #444;border-radius:8px;padding:24px}h1{font:700 26px Arial;color:#65d18a}h2{font:700 22px Arial;color:#65d18a}pre{white-space:pre-wrap;background:#101010;padding:18px;border-radius:5px;color:#ddd;line-height:1.45}.pass{color:#65d18a;font-weight:bold}</style></head><body><section class='card' id='teste1'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 1 - erros do toggle-follow</h2><pre>curl.exe -X POST &quot;$BASE/users/&lt;B_ID&gt;/toggle-follow&quot;`n401 | curl.exe -X POST &quot;$BASE/users/abc/toggle-follow&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`n400 | curl.exe -X POST &quot;$BASE/users/&lt;A_ID&gt;/toggle-follow&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`n400 | curl.exe -X POST &quot;$BASE/users/999999/toggle-follow&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`n404</pre><h2>Resultado real</h2><pre class='pass'>[PASS] sem token -&gt; HTTP 401
+[PASS] id inv&#195;&#161;lido -&gt; HTTP 400
+[PASS] seguir a si mesmo -&gt; HTTP 400
+[PASS] usu&#195;&#161;rio inexistente -&gt; HTTP 404
+[PASS] lista de usu&#195;&#161;rio inexistente -&gt; HTTP 404
+[PASS] feed sem token -&gt; HTTP 401</pre></section><section class='card' id='teste2'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 2 - alternância</h2><pre>curl.exe -X POST &quot;$BASE/users/&lt;B_ID&gt;/toggle-follow&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`n201, 200, 201, 201 e 201</pre><h2>Resultado real</h2><pre class='pass'>[PASS] A segue B -&gt; HTTP 201
+[PASS] A deixa de seguir B -&gt; HTTP 200
+[PASS] A segue B novamente -&gt; HTTP 201
+[PASS] C segue B -&gt; HTTP 201
+[PASS] B segue A -&gt; HTTP 201
+[PASS] A segue B</pre></section><section class='card' id='teste3'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 3 - contadores</h2><pre>curl.exe &quot;$BASE/profile/&lt;B_USERNAME&gt;&quot;`ncurl.exe &quot;$BASE/profile/&lt;A_USERNAME&gt;&quot;`ncurl.exe &quot;$BASE/profile/&lt;C_USERNAME&gt;&quot;</pre><h2>Resultado real</h2><pre class='pass'>[PASS] perfil B -&gt; HTTP 200
+[PASS] B: followersCount
+[PASS] B: followingCount
+[PASS] perfil A -&gt; HTTP 200
+[PASS] A: followersCount
+[PASS] A: followingCount
+[PASS] perfil C -&gt; HTTP 200
+[PASS] C: followersCount
+[PASS] C: followingCount</pre></section><section class='card' id='teste4'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 4 - status e isFollowing</h2><pre>curl.exe &quot;$BASE/users/&lt;B_ID&gt;/follow-status&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`ncurl.exe &quot;$BASE/profile/&lt;B_USERNAME&gt;&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;</pre><h2>Resultado real</h2><pre class='pass'>=== TESTE 4: status e isFollowing ===
+[PASS] A verifica B -&gt; HTTP 200
+[PASS] follow-status A -&gt; B
+[PASS] A abre perfil de B -&gt; HTTP 200
+[PASS] isFollowing A -&gt; B
+[PASS] B abre pr&#195;&#179;prio perfil -&gt; HTTP 200
+[PASS] isFollowing do pr&#195;&#179;prio perfil</pre></section><section class='card' id='teste5'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 5 - listas públicas</h2><pre>curl.exe &quot;$BASE/users/&lt;B_ID&gt;/followers&quot;`ncurl.exe &quot;$BASE/users/&lt;A_ID&gt;/following&quot;`ncurl.exe &quot;$BASE/users/999999/followers&quot;</pre><h2>Resultado real</h2><pre class='pass'>[PASS] seguidores de B -&gt; HTTP 200
+[PASS] quantidade de seguidores de B
+[PASS] seguidor mais recente de B
+[PASS] seguindo de A -&gt; HTTP 200
+[PASS] quantidade seguindo de A
+[PASS] lista de usu&#195;&#161;rio inexistente -&gt; HTTP 404</pre></section><section class='card' id='teste6'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 6 - feed filtrado</h2><pre>curl.exe &quot;$BASE/following-recipes&quot;`ncurl.exe &quot;$BASE/following-recipes&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;`ncurl.exe &quot;$BASE/following-recipes?page=2&amp;limit=1&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;</pre><h2>Resultado real</h2><pre class='pass'>[PASS] feed sem token -&gt; HTTP 401
+[PASS] feed de A -&gt; HTTP 200
+[PASS] A v&#195;&#170; uma receita de B
+[PASS] receita pertence a B
+[PASS] segunda p&#195;&#161;gina vazia -&gt; HTTP 200
+[PASS] feed de D sem follows -&gt; HTTP 200
+[PASS] feed vazio de D</pre></section><section class='card' id='teste7'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 7 - índice único</h2><pre>INSERT INTO follows (follower_id, following_id) VALUES (&lt;A_ID&gt;, &lt;B_ID&gt;);`nExecutar duas vezes no MySQL: a segunda deve retornar erro de chave duplicada.</pre><h2>Resultado real</h2><pre class='pass'>Teste 7 (&#195;&#173;ndice &#195;&#186;nico) permanece no follows-duplicado.sql para execu&#195;&#167;&#195;&#163;o no MySQL.</pre></section><section class='card' id='teste8'><h1>Recipe Master - Atividade 11</h1><h2>TESTE 8 - regressão</h2><pre>curl.exe &quot;$BASE/feed?limit=2&quot; -H &quot;Authorization: Bearer &lt;TOKEN_A&gt;&quot;</pre><h2>Resultado real</h2><pre class='pass'>=== TESTE 8: regress&#195;&#163;o ===
+[PASS] feed geral -&gt; HTTP 200</pre></section></body></html>

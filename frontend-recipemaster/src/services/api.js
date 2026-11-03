@@ -15,6 +15,9 @@ para a nossa aplicação, porém algo está errado pois estamos recebendo erro 4
 import axios from "axios";
 import router from '../router/index.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useToast } from '../composables/useToast.js'
+import { MESSAGES } from '../config/constants.js'
+import { STORAGE_KEYS } from '../config/constants.js'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -23,6 +26,7 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response.data,
     (error) => {
+        const requestConfig = error.config || {}
         if (error.response?.status === 401) {
             useAuthStore().logout()
             if (router.currentRoute.value.name !== 'login') {
@@ -32,14 +36,20 @@ api.interceptors.response.use(
 
         if (error.response) {
             const apiError = error.response.data
+            if (!requestConfig.silent && requestConfig.method !== 'get') {
+                useToast().addToast(apiError.message || MESSAGES.ACTION_ERROR)
+            }
             return Promise.reject({
                 message: apiError.message || 'Erro desconhecido',
                 errors: apiError.errors || [],
                 status: error.response.status
             })
         }else {
+            if (!requestConfig.silent && requestConfig.method !== 'get') {
+                useToast().addToast(MESSAGES.NETWORK_ERROR)
+            }
             return Promise.reject({
-                message: 'Erro inesperado ao preparar a requisição',
+                message: MESSAGES.NETWORK_ERROR,
                 errors: [],
                 status: null
             })
@@ -48,7 +58,7 @@ api.interceptors.response.use(
 )
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('recipeMaster_token')
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN)
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
@@ -58,4 +68,3 @@ api.interceptors.request.use((config) => {
 })
 
 export default api;
-

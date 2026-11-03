@@ -9,6 +9,7 @@ export function updateProfile(formData) {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    silent: true,
   })
 }
 

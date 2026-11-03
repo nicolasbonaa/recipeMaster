@@ -13,6 +13,7 @@
         </main>
       </div>
     <TheFooter />
+    <ToastContainer />
   </div>
 </template>
 
@@ -22,6 +23,7 @@
   import TheNavbar from './components/layout/TheNavbar.vue'
   import TheSidebar from './components/layout/TheSidebar.vue'
   import TheFooter from './components/layout/TheFooter.vue'
+  import ToastContainer from './components/ToastContainer.vue'
 
   const route = useRoute()
   const isLoginPage = computed(() => route.name === 'login')

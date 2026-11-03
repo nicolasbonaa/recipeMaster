@@ -22,21 +22,12 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import RecipeCard from '../../components/RecipeCard.vue'
 import { getLikedRecipes } from '../../services/likeService.js'
+import { useAsyncData } from '../../composables/useAsyncData.js'
 
 const router = useRouter()
+const { data, loading, error, execute } = useAsyncData(getLikedRecipes)
 const recipes = ref([])
-const loading = ref(true)
-const error = ref('')
-
-async function loadRecipes() {
-	try {
-		recipes.value = (await getLikedRecipes()).data || []
-	} catch (requestError) {
-		error.value = requestError.message || 'Não foi possível carregar os itens curtidos.'
-	} finally {
-		loading.value = false
-	}
-}
+async function loadRecipes() { const response = await execute(); recipes.value = response.data || [] }
 
 function openRecipe(recipe) {
 	router.push({ name: 'recipe-detail', params: { id: recipe.id } })

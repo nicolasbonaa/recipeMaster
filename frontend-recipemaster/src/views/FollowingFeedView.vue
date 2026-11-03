@@ -30,7 +30,7 @@
 		</div>
 
 		<div v-if="recipes.length > 0" class="feed-more">
-			<button v-if="hasMore" id="following-load-more" class="btn btn-outline-secondary" type="button" :disabled="loading" @click="loadMore">
+			<button v-if="hasMore" id="following-load-more" class="btn btn-outline-secondary" type="button" :disabled="loading" @click="loadPage()">
 				{{ loading ? 'Carregando...' : 'Carregar mais' }}
 			</button>
 			<p v-else class="feed-end">Você chegou ao fim das receitas de quem você segue.</p>
@@ -39,45 +39,20 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import RecipeCard from '../components/RecipeCard.vue'
 import { getFollowingRecipes } from '../services/followService.js'
+import { usePaginatedList } from '../composables/usePaginatedList.js'
 
 const router = useRouter()
-const recipes = ref([])
-const page = ref(1)
-const limit = 12
-const loading = ref(false)
-const error = ref('')
-const hasMore = ref(true)
-
-async function loadPage() {
-	loading.value = true
-	error.value = ''
-
-	try {
-		const response = await getFollowingRecipes(page.value, limit)
-		const items = response.data || []
-		recipes.value.push(...items)
-		hasMore.value = items.length === limit
-	} catch (requestError) {
-		error.value = requestError.message || 'Não foi possível carregar o feed de quem você segue.'
-	} finally {
-		loading.value = false
-	}
-}
-
-function loadMore() {
-	page.value += 1
-	loadPage()
-}
+const { items: recipes, loading, error, hasMore, loadPage } = usePaginatedList(getFollowingRecipes)
 
 function openRecipe(recipe) {
 	router.push({ name: 'recipe-detail', params: { id: recipe.id } })
 }
 
-onMounted(loadPage)
+onMounted(() => loadPage(true))
 </script>
 
 <style scoped>

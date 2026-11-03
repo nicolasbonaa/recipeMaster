@@ -12,15 +12,14 @@
       <span class="follow-button__label">{{ following ? 'Seguindo' : 'Seguir' }}</span>
       <span v-if="following" class="follow-button__hover">Deixar de seguir</span>
     </button>
-    <p v-if="error" class="follow-button__error" role="alert">{{ error }}</p>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth.js'
 import { toggleFollow } from '../services/followService.js'
+import { useAuthenticatedAction } from '../composables/useAuthenticatedAction.js'
 
 const props = defineProps({
   userId: { type: [Number, String], required: true },
@@ -34,8 +33,7 @@ const followersCount = defineModel('followersCount', { type: Number, default: 0 
 const route = useRoute()
 const router = useRouter()
 const { isAuthenticated } = useAuth()
-const isBusy = ref(false)
-const error = ref('')
+const { isBusy, execute } = useAuthenticatedAction(() => toggleFollow(props.userId))
 
 async function handleClick() {
   // Visitante: vai para o login e volta para este perfil depois de entrar.
@@ -56,20 +54,20 @@ async function handleClick() {
   following.value = nowFollowing
   followersCount.value = Math.max(previousCount + (nowFollowing ? 1 : -1), 0)
   error.value = ''
-  isBusy.value = true
-
   try {
     // 3) Confirma com o servidor e adota os valores reais.
-    const response = await toggleFollow(props.userId)
+    const response = await execute()
+    if (!response) {
+      following.value = previousFollowing
+      followersCount.value = previousCount
+      return
+    }
     following.value = response.data.isFollowing
     followersCount.value = response.data.followersCount
-  } catch (requestError) {
+  } catch {
     // Rollback: volta exatamente para o que era antes do clique.
     following.value = previousFollowing
     followersCount.value = previousCount
-    error.value = requestError.message || 'Não foi possível atualizar. Tente novamente.'
-  } finally {
-    isBusy.value = false
   }
 }
 </script>

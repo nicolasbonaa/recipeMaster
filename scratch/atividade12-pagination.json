@@ -1,0 +1,23 @@
+﻿[
+    {
+        "request":  "GET /api/feed?limit=-3",
+        "status":  200,
+        "items":  12,
+        "page":  null,
+        "limit":  null
+    },
+    {
+        "request":  "GET /api/feed?limit=100000",
+        "status":  200,
+        "items":  45,
+        "page":  null,
+        "limit":  null
+    },
+    {
+        "request":  "GET /api/feed?page=-2\u0026limit=2",
+        "status":  200,
+        "items":  2,
+        "page":  null,
+        "limit":  null
+    }
+]

@@ -1,6 +1,8 @@
 const sequelize = require('../../config/database');
 const Follow = require('./followModel');
 const User = require('../user/userModel');
+const { createNotification, removeNotification } = require('../notification/notificationService');
+const { NOTIFICATION } = require('../../config/constants');
 
 // Dados públicos de uma pessoa (nunca password/email).
 const publicUserAttributes = ['id', 'username', 'fullName', 'bio', 'profilePicture', 'followersCount', 'followingCount', 'recipesCount'];
@@ -39,14 +41,19 @@ async function toggleFollow(followerId, followingId) {
             transaction: t
         });
 
+        // Escrita 4: o aviso para quem é seguido (sem receita).
+        const notification = { userId: followingId, actorId: followerId, type: NOTIFICATION.TYPES.FOLLOW };
+
         if (wasCreated) {
             // Escritas 2 e 3: followersCount sobe NO SEGUIDO; followingCount sobe EM QUEM SEGUE.
             await User.increment('followersCount', { by: 1, where: { id: followingId }, transaction: t });
             await User.increment('followingCount', { by: 1, where: { id: followerId }, transaction: t });
+            await createNotification(notification, t);
         } else {
             await follow.destroy({ transaction: t });
             await User.decrement('followersCount', { by: 1, where: { id: followingId }, transaction: t });
             await User.decrement('followingCount', { by: 1, where: { id: followerId }, transaction: t });
+            await removeNotification(notification, t);
         }
 
         isFollowing = wasCreated;

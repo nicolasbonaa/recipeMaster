@@ -16,8 +16,13 @@
 					<span>{{ formatCount(recipe.commentsCount) }} comentários</span>
 				</div>
 				<LikeButton :recipe-id="recipe.id" :initial-liked="recipe.isLiked" :initial-count="recipe.likesCount" @change="updateLike" />
+				<button class="btn btn-outline-secondary mt-3" type="button" :disabled="isOpeningSave" @click="openSaveModal"><i class="bi bi-bookmark-plus me-1"></i>Salvar</button>
+				<button v-if="!recipe.isOwner" class="btn btn-outline-danger mt-3 ms-2" type="button" :disabled="isOpeningReport" @click="openReportModal"><i class="bi bi-flag me-1"></i>Denunciar</button>
 				<router-link v-if="recipe.isOwner" class="btn btn-brand mt-4" :to="{ name: 'edit-recipe', params: { id: recipe.id } }">Editar</router-link>
 			</div>
+			<!-- Interruptor v-if dentro do bloco que já tem a receita carregada: cada abertura busca o status de novo. -->
+			<ReportRecipeModal v-if="reportModalOpen" :recipe-id="recipe.id" @close="reportModalOpen = false" @reported="handleReported" />
+			<AddToCollectionModal v-if="saveModalOpen" :recipe-id="recipe.id" @close="saveModalOpen = false" />
 		</article>
 		<CommentSection v-if="recipe" :recipe-id="recipe.id" @count-change="recipe.commentsCount = $event" />
 	</section>
@@ -32,9 +37,25 @@ import CommentSection from '../components/CommentSection.vue'
 import { formatCount } from '../utils/format.js'
 import { getRecipeImageUrl } from '../utils/media.js'
 import { useAsyncData } from '../composables/useAsyncData.js'
+import AddToCollectionModal from '../components/AddToCollectionModal.vue'
+import { useAuthenticatedAction } from '../composables/useAuthenticatedAction.js'
+import ReportRecipeModal from '../components/ReportRecipeModal.vue'
+import { useToast } from '../composables/useToast.js'
+import { TOAST } from '../config/constants.js'
 
 const route = useRoute()
 const recipe = ref(null)
+const saveModalOpen = ref(false)
+// Visitante vai para o login (com redirect) e volta para esta receita; logado abre o modal.
+const { isBusy: isOpeningSave, execute: openSaveModal } = useAuthenticatedAction(() => { saveModalOpen.value = true })
+// Denunciar: mesma "cerca" do visitante (login com redirect e volta).
+const reportModalOpen = ref(false)
+const { addToast } = useToast()
+const { isBusy: isOpeningReport, execute: openReportModal } = useAuthenticatedAction(() => { reportModalOpen.value = true })
+function handleReported() {
+	reportModalOpen.value = false
+	addToast('Denúncia enviada. Obrigado por avisar.', 'success', TOAST.SUCCESS_DURATION)
+}
 const { data, loading, error, execute } = useAsyncData(() => getRecipeById(route.params.id))
 
 async function loadRecipe() {
@@ -48,4 +69,4 @@ function updateLike({ liked, likesCount }) {
 }
 
 onMounted(loadRecipe)
-</script>
+</script>

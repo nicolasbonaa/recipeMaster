@@ -4,5 +4,6 @@ const authController = require('./authController');
 const asyncHandler = require('../../middlewares/asyncHandler');
 
 router.post('/login', asyncHandler(authController.createLogin));
+router.post('/logout', asyncHandler(authController.logout));
 
-module.exports = router;
+module.exports = router;

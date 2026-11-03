@@ -9,7 +9,7 @@ const routes = [
 
   // Feed e busca
   { path: '/feed', name: 'feed', component: () => import('../views/FeedView.vue'), meta: { requiresAuth: true } },
-  { path: '/search', name: 'search', component: () => import('../views/SearchView.vue'), meta: { requiresAuth: true } },
+  { path: '/search', name: 'search', component: () => import('../views/SearchView.vue') },
   { path: '/seguindo', name: 'following-feed', component: () => import('../views/FollowingFeedView.vue'), meta: { requiresAuth: true } },
 
   // Receitas
@@ -17,6 +17,11 @@ const routes = [
   { path: '/receitas/:id/editar', name: 'edit-recipe', component: () => import('../views/EditRecipeView.vue'), meta: { requiresAuth: true } },
   { path: '/receitas/:id', name: 'recipe-detail', component: () => import('../views/RecipeDetailView.vue') },
   { path: '/minhas-receitas', name: 'my-recipes', component: () => import('../views/MyRecipesView.vue'), meta: { requiresAuth: true } },
+  { path: '/minhas-colecoes', name: 'my-collections', component: () => import('../views/MyCollectionsView.vue'), meta: { requiresAuth: true } },
+  { path: '/colecoes/:id', name: 'collection-detail', component: () => import('../views/CollectionDetailView.vue') },
+
+  // Notificações (o sino da Navbar usa { name: 'notifications' })
+  { path: '/notificacoes', name: 'notifications', component: () => import('../views/NotificationsView.vue'), meta: { requiresAuth: true } },
 
   // Itens curtidos
   { path: '/favoritos', name: 'my-favorites', component: () => import('../views/favorites/MyFavoritesView.vue'), meta: { requiresAuth: true } },
@@ -55,4 +60,4 @@ router.beforeEach((to) => {
   }
 })
 
-export default router
+export default router

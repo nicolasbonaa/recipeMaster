@@ -2,6 +2,8 @@ const sequelize = require('../../config/database');
 const Comment = require('./commentModel');
 const Recipe = require('../recipe/recipeModel');
 const User = require('../user/userModel');
+const { createNotification } = require('../notification/notificationService');
+const { NOTIFICATION } = require('../../config/constants');
 
 const authorAttributes = ['id', 'username', 'fullName', 'profilePicture'];
 
@@ -22,6 +24,8 @@ async function createComment(userId, recipeId, content) {
         const recipe = await ensureRecipe(recipeId, transaction);
         const comment = await Comment.create({ userId, recipeId, content }, { transaction });
         await recipe.increment('commentsCount', { by: 1, transaction });
+        // Comentar só cria o aviso: a API não exclui comentários, então não há "desfazer".
+        await createNotification({ userId: recipe.userId, actorId: userId, type: NOTIFICATION.TYPES.COMMENT, recipeId: recipe.id }, transaction);
         return Comment.findByPk(comment.id, {
             transaction,
             include: [{ model: User, as: 'author', attributes: authorAttributes }]

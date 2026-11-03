@@ -15,7 +15,24 @@
 				</div>
 
 				<div class="d-flex align-items-center gap-2">
+					<form class="input-group input-group-sm navbar-search" role="search" @submit.prevent="submitSearch">
+						<input v-model="searchText" class="form-control" type="search" placeholder="Buscar receitas ou pessoas" aria-label="Buscar receitas ou pessoas" />
+						<button class="btn btn-outline-secondary" type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+					</form>
 					<template v-if="isAuthenticated">
+						<router-link
+							class="btn btn-outline-secondary btn-sm position-relative notification-bell"
+							:to="{ name: 'notifications' }"
+							:aria-label="bellLabel"
+							:title="bellLabel"
+						>
+							<i class="bi bi-bell" aria-hidden="true"></i>
+							<span
+								v-if="unreadCount > 0"
+								class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+								aria-hidden="true"
+							>{{ badgeText }}</span>
+						</router-link>
 						<div ref="avatarMenu" class="avatar-menu">
 							<button class="avatar-button" type="button" aria-label="Abrir menu do perfil" :aria-expanded="menuOpen" @click.stop="menuOpen = !menuOpen">
 								<img :src="getProfileImageUrl(profile?.profilePicture)" alt="" />
@@ -26,6 +43,7 @@
 								<router-link to="/perfil" @click="closeMenu">Editar Perfil</router-link>
 								<router-link v-if="profile?.username" :to="{ name: 'public-profile', params: { id: profile.username } }" @click="closeMenu">Ver Perfil</router-link>
 								<router-link to="/minhas-receitas" @click="closeMenu">Meus Itens</router-link>
+								<router-link to="/minhas-colecoes" @click="closeMenu">Minhas Coleções</router-link>
 								<button type="button" @click="handleLogout">Sair</button>
 							</div>
 						</div>
@@ -45,14 +63,32 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../../composables/useAuth.js'
 import { getMyProfile } from '../../services/userService.js'
 import { getProfileImageUrl } from '../../utils/media.js'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useClickOutside } from '../../composables/useClickOutside.js'
+import { useNotificationsStore } from '../../stores/notifications.js'
+import { logout as logoutRequest } from '../../services/authService.js'
 
 const { authStore, isAuthenticated } = useAuth()
 const router = useRouter()
 const avatarMenu = ref(null)
 const menuOpen = ref(false)
 const profile = ref(null)
+const searchText = ref('')
+const notificationsStore = useNotificationsStore()
+const unreadCount = computed(() => notificationsStore.unreadCount)
+const badgeText = computed(() => (unreadCount.value > 99 ? '99+' : String(unreadCount.value)))
+const bellLabel = computed(() => {
+	const count = unreadCount.value
+	if (count === 0) return 'Notificações (nenhuma não lida)'
+	return `Notificações (${count} ${count === 1 ? 'não lida' : 'não lidas'})`
+})
+
+// Liga ao entrar na conta e desliga ao sair (immediate: vale também para quem já chega logado).
+watch(isAuthenticated, (logged) => {
+	if (logged) notificationsStore.startPolling()
+	else notificationsStore.stopPolling()
+}, { immediate: true })
+onUnmounted(() => notificationsStore.stopPolling())
 
 useClickOutside(avatarMenu, () => { menuOpen.value = false })
 async function loadProfile() {
@@ -62,9 +98,17 @@ async function loadProfile() {
 onMounted(loadProfile)
 watch(isAuthenticated, loadProfile)
 function closeMenu() { menuOpen.value = false }
+function submitSearch() {
+	const query = searchText.value.trim()
+	if (!query) return
+	router.push({ name: 'search', query: { q: query } })
+	searchText.value = ''
+}
 
-function handleLogout() {
+async function handleLogout() {
 	closeMenu()
+	try { await logoutRequest() } catch { /* silent: sair da conta não depende da resposta */ }
+	notificationsStore.stopPolling()
 	authStore.logout()
 	router.push({ name: 'login' })
 }

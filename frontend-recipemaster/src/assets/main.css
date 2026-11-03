@@ -304,3 +304,5 @@ body {
 
   .recipe-card__footer { align-items: flex-start; flex-wrap: wrap; }
 }
+.navbar-search { width: 260px; }
+.notification-bell { line-height: 1; padding: .35rem .55rem; }

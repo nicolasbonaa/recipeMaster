@@ -8,6 +8,9 @@ const { Op } = require('sequelize');
 const fs = require('fs/promises');
 const path = require('path');
 const { PAGINATION } = require('../../config/constants');
+const collectionService = require('../collection/collectionService');
+const Report = require('../report/reportModel');
+const Notification = require('../notification/notificationModel');
 
 const RECIPE_UPLOADS_DIR = path.join(__dirname, '../../public/uploads/recipes');
 
@@ -118,6 +121,10 @@ async function deleteRecipe(id, userId) {
     await sequelize.transaction(async (transaction) => {
         await Like.destroy({ where: { recipeId: id }, transaction });
         await Comment.destroy({ where: { recipeId: id }, transaction });
+        await collectionService.removeRecipeFromCollections(id, transaction);
+        // Filhas antes do pai: denúncias (FK NO ACTION) e avisos (FK SET NULL) da receita.
+        await Report.destroy({ where: { recipeId: id }, transaction });
+        await Notification.destroy({ where: { recipeId: id }, transaction });
         await recipe.destroy({ transaction });
         await User.decrement('recipesCount', { by: 1, where: { id: userId }, transaction });
     });

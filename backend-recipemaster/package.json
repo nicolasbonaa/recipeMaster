@@ -8,6 +8,8 @@
     "test:watch": "jest --watch",
     "teste-aula-11": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\teste-aula-11.ps1",
     "teste-aula-12": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\teste-aula-12.ps1",
+    "teste-aula-13": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\teste-aula-13.ps1",
+    "teste-aula-14": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\teste-aula-14.ps1",
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www"
   },

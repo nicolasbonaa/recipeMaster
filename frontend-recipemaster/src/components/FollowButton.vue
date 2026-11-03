@@ -20,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth.js'
 import { toggleFollow } from '../services/followService.js'
 import { useAuthenticatedAction } from '../composables/useAuthenticatedAction.js'
+import { runOptimistic } from '../utils/optimistic.js'
 
 const props = defineProps({
   userId: { type: [Number, String], required: true },
@@ -51,24 +52,18 @@ async function handleClick() {
   //    com defineModel, following.value só reflete a atribuição depois que o pai
   //    atualizar a prop, então lê-lo logo após atribuir devolveria o valor antigo.
   const nowFollowing = !previousFollowing
-  following.value = nowFollowing
-  followersCount.value = Math.max(previousCount + (nowFollowing ? 1 : -1), 0)
-  error.value = ''
-  try {
-    // 3) Confirma com o servidor e adota os valores reais.
-    const response = await execute()
-    if (!response) {
-      following.value = previousFollowing
-      followersCount.value = previousCount
-      return
+  await runOptimistic({
+    apply: () => {
+      following.value = nowFollowing
+      followersCount.value = Math.max(previousCount + (nowFollowing ? 1 : -1), 0)
+      return () => { following.value = previousFollowing; followersCount.value = previousCount }
+    },
+    request: execute,
+    confirm: (data) => {
+      following.value = data.isFollowing
+      followersCount.value = data.followersCount
     }
-    following.value = response.data.isFollowing
-    followersCount.value = response.data.followersCount
-  } catch {
-    // Rollback: volta exatamente para o que era antes do clique.
-    following.value = previousFollowing
-    followersCount.value = previousCount
-  }
+  })
 }
 </script>
 

@@ -1,14 +1,13 @@
 const searchService = require('./searchService');
 const { success } = require('../../middlewares/apiResponse');
 
-exports.search = (req, res) => {
-    const query = req.query.q || '';
-    let searchResults = { receitas: [], users: [] };
+const { SEARCH } = require('../../config/constants');
 
-    if (query) {
-        searchResults = searchService.globalSearch(query);
-    }
-
+exports.search = async (req, res) => {
+    const rawQuery = typeof req.query.q === 'string' ? req.query.q : '';
+    const query = rawQuery.trim().slice(0, SEARCH.MAX_LENGTH);
+    const searchResults = query.length >= SEARCH.MIN_LENGTH
+        ? await searchService.globalSearch(query)
+        : { receitas: [], users: [] };
     return success(res, { query, ...searchResults });
 }
-

@@ -20,6 +20,7 @@ import { useAuth } from '../composables/useAuth.js'
 import { toggleLike } from '../services/likeService.js'
 import { formatCount } from '../utils/format.js'
 import { useAuthenticatedAction } from '../composables/useAuthenticatedAction.js'
+import { runOptimistic } from '../utils/optimistic.js'
 
 const props = defineProps({
   recipeId: { type: [Number, String], required: true },
@@ -45,22 +46,20 @@ async function handleClick() {
   }
 
   const previousLiked = liked.value
+  const nowLiked = !previousLiked
   const previousCount = likesCount.value
-  liked.value = !previousLiked
-  likesCount.value = Math.max(previousCount + (liked.value ? 1 : -1), 0)
-  try {
-    const response = await execute()
-    if (!response) {
-      liked.value = previousLiked
-      likesCount.value = previousCount
-      return
+  await runOptimistic({
+    apply: () => {
+      liked.value = nowLiked
+      likesCount.value = Math.max(previousCount + (nowLiked ? 1 : -1), 0)
+      return () => { liked.value = previousLiked; likesCount.value = previousCount }
+    },
+    request: execute,
+    confirm: (data) => {
+      liked.value = data.liked
+      likesCount.value = data.likesCount
+      emit('change', { liked: liked.value, likesCount: likesCount.value })
     }
-    liked.value = response.data.liked
-    likesCount.value = response.data.likesCount
-    emit('change', { liked: liked.value, likesCount: likesCount.value })
-  } catch {
-    liked.value = previousLiked
-    likesCount.value = previousCount
-  }
+  })
 }
 </script>
